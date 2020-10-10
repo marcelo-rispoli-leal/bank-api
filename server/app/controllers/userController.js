@@ -250,7 +250,7 @@ const updateOne = async (req, res, next) => {
   }
 };
 
-//deletes an account and revoke customer access to user
+//deletes an user
 const deleteOne = async (req, res, next) => {
   try {
     let account = undefined;

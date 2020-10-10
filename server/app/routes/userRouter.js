@@ -8,10 +8,10 @@ const router = express.Router();
 router.use(authMiddleware);
 //user or customer access only
 router.get('/details', controller.findById);
+router.put('/register', controller.updateOne);
 router.patch('/email', controller.setEmail);
 router.patch('/mobile', controller.setMobilePhone);
 router.patch('/landline', controller.setFixedPhone);
-router.put('/register', controller.updateOne);
 router.delete('/delete', controller.deleteOne);
 
 //non-customer user access only

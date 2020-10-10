@@ -39,7 +39,7 @@ export const swaggerDoc = {
           description: 'Request body for the user to create his registration.',
           content: {
             'multipart/form-data': {
-              schema: { $ref: '#/components/schemas/AuthRegisterRequest' },
+              schema: { $ref: '#/components/requestBodies/authRegister' },
               encoding: { file: { contentType: 'application/pdf' } },
             },
           },
@@ -49,9 +49,7 @@ export const swaggerDoc = {
             description: 'OK',
             content: {
               'application/json': {
-                schema: {
-                  $ref: '#/components/responses/AuthRegisterResponse200',
-                },
+                schema: { $ref: '#/components/responses/authRegister' },
               },
             },
           },
@@ -59,7 +57,7 @@ export const swaggerDoc = {
             description: 'Bad Request',
             content: {
               'application/json': {
-                schema: { $ref: '#/components/responses/ResponseError' },
+                schema: { $ref: '#/components/responses/responseError' },
                 examples: {
                   invalidPDF: { $ref: '#/components/responses/invalidPDF' },
                   requiredBody: { $ref: '#/components/responses/requiredBody' },
@@ -98,7 +96,7 @@ export const swaggerDoc = {
           description: 'Request body for the user authentication in the API.',
           content: {
             'application/json': {
-              schema: { $ref: '#/components/schemas/AuthAuthenticateRequest' },
+              schema: { $ref: '#/components/requestBodies/authAuthenticate' },
             },
           },
         },
@@ -107,9 +105,7 @@ export const swaggerDoc = {
             description: 'OK',
             content: {
               'application/json': {
-                schema: {
-                  $ref: '#/components/responses/AuthAuthenticateResponse200',
-                },
+                schema: { $ref: '#/components/responses/authAuthenticate' },
               },
             },
           },
@@ -117,7 +113,7 @@ export const swaggerDoc = {
             description: 'Bad Request',
             content: {
               'application/json': {
-                schema: { $ref: '#/components/responses/ResponseError' },
+                schema: { $ref: '#/components/responses/responseError' },
                 examples: {
                   requiredBody: { $ref: '#/components/responses/requiredBody' },
                   requiredFields: {
@@ -154,10 +150,9 @@ export const swaggerDoc = {
         requestBody: {
           description:
             'Request body for the user to inform that he forgot his password.',
-          required: true,
           content: {
             'application/json': {
-              schema: { $ref: '#/components/schemas/RequestCPForCNPJ' },
+              schema: { $ref: '#/components/requestBodies/requiredCPForCNPJ' },
             },
           },
         },
@@ -166,7 +161,7 @@ export const swaggerDoc = {
             description: 'OK',
             content: {
               'application/json': {
-                schema: { $ref: '#/components/responses/ResponseSuccess' },
+                schema: { $ref: '#/components/responses/success' },
                 example: { success: 'Forgot password email sended.' },
               },
             },
@@ -175,7 +170,7 @@ export const swaggerDoc = {
             description: 'Bad Request',
             content: {
               'application/json': {
-                schema: { $ref: '#/components/responses/ResponseError' },
+                schema: { $ref: '#/components/responses/responseError' },
                 examples: {
                   requiredBody: { $ref: '#/components/responses/requiredBody' },
                   requiredField: {
@@ -217,7 +212,7 @@ export const swaggerDoc = {
           required: true,
           content: {
             'application/json': {
-              schema: { $ref: '#/components/schemas/AuthResetPassRequest' },
+              schema: { $ref: '#/components/requestBodies/authResetPass' },
             },
           },
         },
@@ -226,7 +221,7 @@ export const swaggerDoc = {
             description: 'OK',
             content: {
               'application/json': {
-                schema: { $ref: '#/components/responses/ResponseSuccess' },
+                schema: { $ref: '#/components/responses/success' },
                 example: { success: 'Password redefined.' },
               },
             },
@@ -235,7 +230,7 @@ export const swaggerDoc = {
             description: 'Bad Request',
             content: {
               'application/json': {
-                schema: { $ref: '#/components/responses/ResponseError' },
+                schema: { $ref: '#/components/responses/responseError' },
                 examples: {
                   requiredBody: { $ref: '#/components/responses/requiredBody' },
                   requiredFields: {
@@ -279,7 +274,7 @@ export const swaggerDoc = {
             content: {
               'application/json': {
                 schema: {
-                  $ref: '#/components/responses/UserDetailsResponse200',
+                  $ref: '#/components/responses/userDetails',
                 },
               },
             },
@@ -302,7 +297,7 @@ export const swaggerDoc = {
             content: {
               'application/json': {
                 schema: {
-                  $ref: '#/components/responses/UserDetailsResponse200',
+                  $ref: '#/components/responses/userDetails',
                 },
               },
             },
@@ -311,7 +306,7 @@ export const swaggerDoc = {
             description: 'Bad Request',
             content: {
               'application/json': {
-                schema: { $ref: '#/components/responses/ResponseError' },
+                schema: { $ref: '#/components/responses/responseError' },
                 examples: {
                   requiredParams: {
                     $ref: '#/components/responses/requiredParams',
@@ -347,7 +342,7 @@ export const swaggerDoc = {
             content: {
               'application/json': {
                 schema: {
-                  $ref: '#/components/responses/UsersList',
+                  $ref: '#/components/responses/userList',
                 },
               },
             },
@@ -358,7 +353,7 @@ export const swaggerDoc = {
             description: 'Not Found',
             content: {
               'application/json': {
-                schema: { $ref: '#/components/responses/ResponseError' },
+                schema: { $ref: '#/components/responses/responseError' },
                 example: {
                   error:
                     "Users with case-insensitive name containing 'XYZ' not found.",
@@ -371,9 +366,525 @@ export const swaggerDoc = {
         security: [{ token: '' }],
       },
     },
+    '/user/list/{userCategory}': {
+      get: {
+        tags: ['user'],
+        summary: 'Workers gets a list of all users with a name filter.',
+        description:
+          'Workers gets a list of users with an optional name snippet filter.',
+        parameters: [
+          { $ref: '#/components/parameters/userCategory' },
+          { $ref: '#/components/parameters/nameSnippet' },
+        ],
+        responses: {
+          200: {
+            description: 'OK',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/responses/userList',
+                },
+              },
+            },
+          },
+          401: { $ref: '#/components/responses/authenticationError' },
+          403: { $ref: '#/components/responses/workerAccessOnly' },
+          404: {
+            description: 'Not Found',
+            content: {
+              'application/json': {
+                schema: { $ref: '#/components/responses/responseError' },
+                examples: {
+                  physicalPersonsNotFound: {
+                    value: {
+                      error:
+                        "Physical person users with case-insensitive name containing 'XYZ' not found.",
+                    },
+                  },
+                  legalPersonsNotFound: {
+                    value: {
+                      error:
+                        "Legal person users with case-insensitive name containing 'XYZ' not found.",
+                    },
+                  },
+                  workersNotFound: {
+                    value: {
+                      error:
+                        "Worker users with case-insensitive name containing 'XYZ' not found.",
+                    },
+                  },
+                  uncheckedUsersNotFound: {
+                    value: {
+                      error:
+                        "Unchecked users with case-insensitive name containing 'XYZ' not found.",
+                    },
+                  },
+                },
+              },
+            },
+          },
+          500: { $ref: '#/components/responses/unexpectedError' },
+        },
+        security: [{ token: '' }],
+      },
+    },
+    '/user/register': {
+      put: {
+        tags: ['user'],
+        summary: 'Authenticated user updates his own data.',
+        description: 'Authenticated user updates his own email and phones.',
+        requestBody: {
+          description: 'Request body for the user updates his own data.',
+          content: {
+            'application/json': {
+              schema: { $ref: '#/components/requestBodies/userRegister' },
+            },
+          },
+        },
+        responses: {
+          200: {
+            description: 'OK',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/responses/userRegister',
+                },
+              },
+            },
+          },
+          400: {
+            description: 'Bad Request',
+            content: {
+              'application/json': {
+                schema: { $ref: '#/components/responses/responseError' },
+                examples: {
+                  requiredBody: { $ref: '#/components/responses/requiredBody' },
+                  requiredFields: {
+                    value: {
+                      error:
+                        "The fields 'email', 'mobilePhone', 'fixedPhone' " +
+                        'are required in this request, but the field ' +
+                        "'email' has been omitted.",
+                    },
+                  },
+                  invalidEmail: { $ref: '#/components/responses/invalidEmail' },
+                },
+              },
+            },
+          },
+          401: { $ref: '#/components/responses/authenticationError' },
+          500: { $ref: '#/components/responses/unexpectedError' },
+        },
+        security: [{ token: '' }],
+      },
+    },
+    '/user/setEmail': {
+      patch: {
+        tags: ['user'],
+        summary: 'Authenticated user updates his email.',
+        description: 'Authenticated user updates his own email.',
+        requestBody: {
+          description: 'Request body for the user updates his own email.',
+          content: {
+            'application/json': {
+              schema: { $ref: '#/components/requestBodies/userSetEmail' },
+            },
+          },
+        },
+        responses: {
+          200: {
+            description: 'OK',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/responses/userPatch',
+                },
+              },
+            },
+          },
+          400: {
+            description: 'Bad Request',
+            content: {
+              'application/json': {
+                schema: { $ref: '#/components/responses/responseError' },
+                examples: {
+                  requiredBody: { $ref: '#/components/responses/requiredBody' },
+                  requiredField: {
+                    value: {
+                      error:
+                        "The field 'email' is required in this request, " +
+                        'but has been omitted.',
+                    },
+                  },
+                  invalidEmail: { $ref: '#/components/responses/invalidEmail' },
+                },
+              },
+            },
+          },
+          401: { $ref: '#/components/responses/authenticationError' },
+          500: { $ref: '#/components/responses/unexpectedError' },
+        },
+        security: [{ token: '' }],
+      },
+    },
+    '/user/setMobile': {
+      patch: {
+        tags: ['user'],
+        summary: 'Authenticated user updates his cell phone.',
+        description: 'Authenticated user updates his own mobile phone number.',
+        requestBody: {
+          description: 'Request body for the user updates his own cell phone.',
+          content: {
+            'application/json': {
+              schema: { $ref: '#/components/requestBodies/userSetMobile' },
+            },
+          },
+        },
+        responses: {
+          200: {
+            description: 'OK',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/responses/userSetMobile',
+                },
+              },
+            },
+          },
+          400: {
+            description: 'Bad Request',
+            content: {
+              'application/json': {
+                schema: { $ref: '#/components/responses/responseError' },
+                examples: {
+                  requiredBody: { $ref: '#/components/responses/requiredBody' },
+                  requiredField: {
+                    value: {
+                      error:
+                        "The field 'mobilePhone' is required in this request, " +
+                        'but has been omitted.',
+                    },
+                  },
+                  invalidPhone: {
+                    value: {
+                      error:
+                        "The number '1199998888' is not a valid Brazilian " +
+                        'mobile phone according to Google rules.',
+                    },
+                  },
+                },
+              },
+            },
+          },
+          401: { $ref: '#/components/responses/authenticationError' },
+          500: { $ref: '#/components/responses/unexpectedError' },
+        },
+        security: [{ token: '' }],
+      },
+    },
+    '/user/setLandline': {
+      patch: {
+        tags: ['user'],
+        summary: 'Authenticated user updates his landline.',
+        description: 'Authenticated user updates his own fixed phone number.',
+        requestBody: {
+          description: 'Request body for the user updates his own landline.',
+          content: {
+            'application/json': {
+              schema: { $ref: '#/components/requestBodies/userSetLandline' },
+            },
+          },
+        },
+        responses: {
+          200: {
+            description: 'OK',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/responses/userSetLandline',
+                },
+              },
+            },
+          },
+          400: {
+            description: 'Bad Request',
+            content: {
+              'application/json': {
+                schema: { $ref: '#/components/responses/responseError' },
+                examples: {
+                  requiredBody: { $ref: '#/components/responses/requiredBody' },
+                  requiredField: {
+                    value: {
+                      error:
+                        "The field 'fixedPhone' is required in this request, " +
+                        'but has been omitted.',
+                    },
+                  },
+                  invalidPhone: {
+                    value: {
+                      error:
+                        "The number '11333334444' is not a valid Brazilian " +
+                        'fixed phone according to Google rules.',
+                    },
+                  },
+                },
+              },
+            },
+          },
+          401: { $ref: '#/components/responses/authenticationError' },
+          500: { $ref: '#/components/responses/unexpectedError' },
+        },
+        security: [{ token: '' }],
+      },
+    },
+    '/user/setName': {
+      patch: {
+        tags: ['user'],
+        summary: 'Authenticated non-customer user updates his name.',
+        description: 'Authenticated non-customer user updates his own name.',
+        requestBody: {
+          description: 'Request body for the user updates his own name.',
+          content: {
+            'application/json': {
+              schema: { $ref: '#/components/requestBodies/userSetName' },
+            },
+          },
+        },
+        responses: {
+          200: {
+            description: 'OK',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/responses/userPatch',
+                },
+              },
+            },
+          },
+          400: {
+            description: 'Bad Request',
+            content: {
+              'application/json': {
+                schema: { $ref: '#/components/responses/responseError' },
+                examples: {
+                  requiredBody: { $ref: '#/components/responses/requiredBody' },
+                  requiredField: {
+                    value: {
+                      error:
+                        "The field 'name' is required in this request, " +
+                        'but has been omitted.',
+                    },
+                  },
+                },
+              },
+            },
+          },
+          401: { $ref: '#/components/responses/authenticationError' },
+          403: { $ref: '#/components/responses/userAccessOnly' },
+          500: { $ref: '#/components/responses/unexpectedError' },
+        },
+        security: [{ token: '' }],
+      },
+    },
+    '/user/setFile': {
+      patch: {
+        tags: ['user'],
+        summary: 'Authenticated non-customer user updates his own PDF file.',
+        description:
+          'Authenticated non-customer user updates his PDF documentation file.',
+        requestBody: {
+          description: 'Request body for the user updates his own PDF file.',
+          content: {
+            'multipart/form-data': {
+              schema: { $ref: '#/components/requestBodies/userSetFile' },
+              encoding: { file: { contentType: 'application/pdf' } },
+            },
+          },
+        },
+        responses: {
+          200: {
+            description: 'OK',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/responses/userSetFile',
+                },
+              },
+            },
+          },
+          400: {
+            description: 'Bad Request',
+            content: {
+              'application/json': {
+                schema: { $ref: '#/components/responses/responseError' },
+                examples: {
+                  invalidPDF: { $ref: '#/components/responses/invalidPDF' },
+                  requiredPDF: {
+                    value: {
+                      error:
+                        'This request must have a PDF file uploaded. The account ' +
+                        'is created after sending and approving the documentation.',
+                    },
+                  },
+                },
+              },
+            },
+          },
+          401: { $ref: '#/components/responses/authenticationError' },
+          403: { $ref: '#/components/responses/userAccessOnly' },
+          500: { $ref: '#/components/responses/unexpectedError' },
+        },
+        security: [{ token: '' }],
+      },
+    },
+    '/user/setWorker': {
+      patch: {
+        tags: ['user'],
+        summary: 'Worker grants worker access privileges to a user.',
+        description:
+          'Worker user grants worker access privileges to another user.',
+        requestBody: {
+          description: 'Request body for grants worker privileges to a user.',
+          content: {
+            'application/json': {
+              schema: { $ref: '#/components/requestBodies/requiredCPF' },
+            },
+          },
+        },
+        responses: {
+          200: {
+            description: 'OK',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/responses/userSetWorker',
+                },
+              },
+            },
+          },
+          400: {
+            description: 'Bad Request',
+            content: {
+              'application/json': {
+                schema: { $ref: '#/components/responses/responseError' },
+                examples: {
+                  requiredBody: { $ref: '#/components/responses/requiredBody' },
+                  requiredField: {
+                    value: {
+                      error:
+                        "The field 'CPF' is required in this request, " +
+                        'but has been omitted.',
+                    },
+                  },
+                  invalidCPF: { $ref: '#/components/responses/invalidCPF' },
+                },
+              },
+            },
+          },
+          401: { $ref: '#/components/responses/authenticationError' },
+          403: { $ref: '#/components/responses/workerAccessOnly' },
+          404: { $ref: '#/components/responses/userNotFound' },
+          500: { $ref: '#/components/responses/unexpectedError' },
+        },
+        security: [{ token: '' }],
+      },
+    },
+    '/user/setWorker/Revoke': {
+      patch: {
+        tags: ['user'],
+        summary: 'Worker revokes worker access privileges to a user.',
+        description:
+          'Worker user revokes worker access privileges to another user.',
+        requestBody: {
+          description: 'Request body for revokes worker privileges to a user.',
+          content: {
+            'application/json': {
+              schema: { $ref: '#/components/requestBodies/requiredCPF' },
+            },
+          },
+        },
+        responses: {
+          200: {
+            description: 'OK',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/responses/userUnsetWorker',
+                },
+              },
+            },
+          },
+          400: {
+            description: 'Bad Request',
+            content: {
+              'application/json': {
+                schema: { $ref: '#/components/responses/responseError' },
+                examples: {
+                  requiredBody: { $ref: '#/components/responses/requiredBody' },
+                  requiredField: {
+                    value: {
+                      error:
+                        "The field 'CPF' is required in this request, " +
+                        'but has been omitted.',
+                    },
+                  },
+                  invalidCPF: { $ref: '#/components/responses/invalidCPF' },
+                },
+              },
+            },
+          },
+          401: { $ref: '#/components/responses/authenticationError' },
+          403: { $ref: '#/components/responses/workerAccessOnly' },
+          404: { $ref: '#/components/responses/userNotFound' },
+          500: { $ref: '#/components/responses/unexpectedError' },
+        },
+        security: [{ token: '' }],
+      },
+    },
+    '/user/delete': {
+      delete: {
+        tags: ['user'],
+        summary: 'Authenticated user deletes his registration.',
+        description: 'Authenticated user deletes his own registration.',
+        responses: {
+          200: {
+            description: 'OK',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/responses/success',
+                },
+                example: {
+                  success: "User '123.456.789-09' deleted.",
+                },
+              },
+            },
+          },
+          400: {
+            description: 'Bad Request',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/responses/responseError',
+                },
+                example: {
+                  error:
+                    "Operation not allowed. To delete the account '100000000' " +
+                    "the balance must be zero, but the current amount is '0.01'.",
+                },
+              },
+            },
+          },
+          401: { $ref: '#/components/responses/authenticationError' },
+          500: { $ref: '#/components/responses/unexpectedError' },
+        },
+        security: [{ token: '' }],
+      },
+    },
   },
   components: {
     requestBodies: {
+      //#region request bodies fields
       name: {
         name: 'name',
         type: 'string',
@@ -432,6 +943,99 @@ export const swaggerDoc = {
         type: 'string',
         example: 'ef48e2532f535a1822e0b5df376e9f4718acfa04ed00af59ae70ad33659d',
       },
+      CPF: {
+        name: 'CPF',
+        type: 'string',
+        description:
+          'CPF is the Brazilian code for individuals (physical persons). ' +
+          'This code is unique for each person and is validated in our API.',
+        example: '123.456.789-09',
+      },
+      //#endregion
+
+      //#region request bodies schemas
+      authRegister: {
+        type: 'object',
+        required: ['name', 'CPForCNPJ', 'email', 'password'],
+        properties: {
+          name: { $ref: '#/components/requestBodies/name' },
+          CPForCNPJ: { $ref: '#/components/requestBodies/CPForCNPJ' },
+          email: { $ref: '#/components/requestBodies/email' },
+          password: { $ref: '#/components/requestBodies/password' },
+          mobilePhone: { $ref: '#/components/requestBodies/mobilePhone' },
+          fixedPhone: { $ref: '#/components/requestBodies/fixedPhone' },
+          file: { $ref: '#/components/requestBodies/file' },
+        },
+      },
+      authAuthenticate: {
+        type: 'object',
+        required: ['CPForCNPJ', 'password'],
+        properties: {
+          CPForCNPJ: { $ref: '#/components/requestBodies/CPForCNPJ' },
+          password: { $ref: '#/components/requestBodies/password' },
+        },
+      },
+      authResetPass: {
+        type: 'object',
+        required: ['CPForCNPJ', 'password', 'token'],
+        properties: {
+          CPForCNPJ: { $ref: '#/components/requestBodies/CPForCNPJ' },
+          password: { $ref: '#/components/requestBodies/password' },
+          token: { $ref: '#/components/requestBodies/tokenReset' },
+        },
+      },
+      userRegister: {
+        type: 'object',
+        required: ['email', 'mobilePhone', 'fixedPhone'],
+        properties: {
+          email: { $ref: '#/components/requestBodies/email' },
+          mobilePhone: { $ref: '#/components/requestBodies/mobilePhone' },
+          fixedPhone: { $ref: '#/components/requestBodies/fixedPhone' },
+        },
+      },
+      userSetEmail: {
+        type: 'object',
+        required: ['email'],
+        properties: {
+          email: { $ref: '#/components/requestBodies/email' },
+        },
+      },
+      userSetMobile: {
+        type: 'object',
+        required: ['mobilePhone'],
+        properties: {
+          mobilePhone: { $ref: '#/components/requestBodies/mobilePhone' },
+        },
+      },
+      userSetLandline: {
+        type: 'object',
+        required: ['fixedPhone'],
+        properties: {
+          fixedPhone: { $ref: '#/components/requestBodies/fixedPhone' },
+        },
+      },
+      userSetFile: {
+        type: 'object',
+        required: ['file'],
+        properties: {
+          file: { $ref: '#/components/requestBodies/file' },
+        },
+      },
+      requiredCPForCNPJ: {
+        type: 'object',
+        required: ['CPForCNPJ'],
+        properties: {
+          CPForCNPJ: { $ref: '#/components/requestBodies/CPForCNPJ' },
+        },
+      },
+      requiredCPF: {
+        type: 'object',
+        required: ['CPForCNPJ'],
+        properties: {
+          CPF: { $ref: '#/components/requestBodies/CPF' },
+        },
+      },
+      //#endregion
     },
     parameters: {
       CPForCNPJ: {
@@ -447,47 +1051,21 @@ export const swaggerDoc = {
         in: 'query',
         required: false,
         name: 'name',
-        type: 'string',
+        schema: { type: 'string' },
         description:
           'Filters users by name snippet without case-sensitive search.',
       },
-    },
-    schemas: {
-      AuthRegisterRequest: {
-        type: 'object',
-        required: ['name', 'CPForCNPJ', 'email', 'password'],
-        properties: {
-          name: { $ref: '#/components/requestBodies/name' },
-          CPForCNPJ: { $ref: '#/components/requestBodies/CPForCNPJ' },
-          email: { $ref: '#/components/requestBodies/email' },
-          password: { $ref: '#/components/requestBodies/password' },
-          mobilePhone: { $ref: '#/components/requestBodies/mobilePhone' },
-          fixedPhone: { $ref: '#/components/requestBodies/fixedPhone' },
-          file: { $ref: '#/components/requestBodies/file' },
-        },
-      },
-      AuthAuthenticateRequest: {
-        type: 'object',
-        required: ['CPForCNPJ', 'password'],
-        properties: {
-          CPForCNPJ: { $ref: '#/components/requestBodies/CPForCNPJ' },
-          password: { $ref: '#/components/requestBodies/password' },
-        },
-      },
-      AuthResetPassRequest: {
-        type: 'object',
-        required: ['CPForCNPJ', 'password', 'token'],
-        properties: {
-          CPForCNPJ: { $ref: '#/components/requestBodies/CPForCNPJ' },
-          password: { $ref: '#/components/requestBodies/password' },
-          token: { $ref: '#/components/requestBodies/tokenReset' },
-        },
-      },
-      RequestCPForCNPJ: {
-        type: 'object',
-        required: ['CPForCNPJ'],
-        properties: {
-          CPForCNPJ: { $ref: '#/components/requestBodies/CPForCNPJ' },
+      userCategory: {
+        in: 'path',
+        required: true,
+        name: 'userCategory',
+        description:
+          'Worker lists users according to their category: ' +
+          'PF - Physical Persons, PJ - Juridical Persons, worker - Bank Employee, ' +
+          'unchecked: Users with documentation submitted but not verified',
+        schema: {
+          type: 'string',
+          enum: ['PF', 'PJ', 'worker', 'unchecked'],
         },
       },
     },
@@ -524,6 +1102,20 @@ export const swaggerDoc = {
           '6ZmFsc2UsImN1c3RvbWVyIjpmYWxzZSwiaWF0IjoxNjAxNTAwNTA2LCJleHAiOjE2M' +
           'DE1ODY5MDZ9.nU8OQVPZknPcw8-810a0N8yLMc0XssCLKf3d5FNP20E',
       },
+      workerTrue: {
+        name: 'worker',
+        description:
+          'Indicates whether the user has bank employee access privilege.',
+        type: 'boolean',
+        example: true,
+      },
+      workerFalse: {
+        name: 'worker',
+        description:
+          'Indicates whether the user has bank employee access privilege.',
+        type: 'boolean',
+        example: false,
+      },
       alertMobilePhone: {
         name: 'mobilePhone',
         type: 'string',
@@ -556,7 +1148,16 @@ export const swaggerDoc = {
       },
       //#endregion
 
-      AuthRegisterResponse200: {
+      //#region response code 200
+      success: {
+        type: 'object',
+        properties: {
+          success: {
+            type: 'string',
+          },
+        },
+      },
+      authRegister: {
         type: 'object',
         properties: {
           user: {
@@ -584,7 +1185,7 @@ export const swaggerDoc = {
           },
         },
       },
-      AuthAuthenticateResponse200: {
+      authAuthenticate: {
         type: 'object',
         properties: {
           name: { $ref: '#/components/requestBodies/name' },
@@ -593,7 +1194,7 @@ export const swaggerDoc = {
           token: { $ref: '#/components/responses/tokenAuth' },
         },
       },
-      UserDetailsResponse200: {
+      userDetails: {
         type: 'object',
         description: "Returns the user's details.",
         properties: {
@@ -605,7 +1206,7 @@ export const swaggerDoc = {
           createdAt: { $ref: '#/components/responses/createdAt' },
         },
       },
-      UsersList: {
+      userList: {
         type: 'array',
         description: 'Returns a list of users.',
         items: {
@@ -617,15 +1218,87 @@ export const swaggerDoc = {
           },
         },
       },
-      ResponseSuccess: {
+      userRegister: {
         type: 'object',
         properties: {
-          success: {
-            type: 'string',
+          user: {
+            type: 'object',
+            description: "Returns the user's updated data",
+            properties: {
+              name: { $ref: '#/components/requestBodies/name' },
+              CPForCNPJ: { $ref: '#/components/requestBodies/CPForCNPJ' },
+              email: { $ref: '#/components/requestBodies/email' },
+              mobilePhone: { $ref: '#/components/requestBodies/mobilePhone' },
+              fixedPhone: { $ref: '#/components/requestBodies/fixedPhone' },
+            },
+          },
+          alert: {
+            type: 'object',
+            description: 'Alerts the user of unsaved phones',
+            properties: {
+              mobilePhone: { $ref: '#/components/responses/alertMobilePhone' },
+              fixedPhone: { $ref: '#/components/responses/alertFixedPhone' },
+            },
           },
         },
       },
-      ResponseError: {
+      userPatch: {
+        type: 'object',
+        properties: {
+          name: { $ref: '#/components/requestBodies/name' },
+          CPForCNPJ: { $ref: '#/components/requestBodies/CPForCNPJ' },
+          email: { $ref: '#/components/requestBodies/email' },
+        },
+      },
+      userSetMobile: {
+        type: 'object',
+        properties: {
+          name: { $ref: '#/components/requestBodies/name' },
+          CPForCNPJ: { $ref: '#/components/requestBodies/CPForCNPJ' },
+          email: { $ref: '#/components/requestBodies/email' },
+          mobilePhone: { $ref: '#/components/requestBodies/mobilePhone' },
+        },
+      },
+      userSetLandline: {
+        type: 'object',
+        properties: {
+          name: { $ref: '#/components/requestBodies/name' },
+          CPForCNPJ: { $ref: '#/components/requestBodies/CPForCNPJ' },
+          email: { $ref: '#/components/requestBodies/email' },
+          fixedPhone: { $ref: '#/components/requestBodies/fixedPhone' },
+        },
+      },
+      userSetFile: {
+        type: 'object',
+        properties: {
+          name: { $ref: '#/components/requestBodies/name' },
+          CPForCNPJ: { $ref: '#/components/requestBodies/CPForCNPJ' },
+          email: { $ref: '#/components/requestBodies/email' },
+          fileName: { $ref: '#/components/responses/fileName' },
+        },
+      },
+      userSetWorker: {
+        type: 'object',
+        properties: {
+          worker: { $ref: '#/components/responses/workerTrue' },
+          name: { $ref: '#/components/requestBodies/name' },
+          CPForCNPJ: { $ref: '#/components/requestBodies/CPForCNPJ' },
+          email: { $ref: '#/components/requestBodies/email' },
+        },
+      },
+      userUnsetWorker: {
+        type: 'object',
+        properties: {
+          worker: { $ref: '#/components/responses/workerFalse' },
+          name: { $ref: '#/components/requestBodies/name' },
+          CPForCNPJ: { $ref: '#/components/requestBodies/CPForCNPJ' },
+          email: { $ref: '#/components/requestBodies/email' },
+        },
+      },
+      //#endregion
+
+      //#region response error
+      responseError: {
         type: 'object',
         properties: {
           error: {
@@ -635,7 +1308,9 @@ export const swaggerDoc = {
           },
         },
       },
-      //#region reponses code 400
+      //#endregion
+
+      //#region responses code 400
       requiredBody: {
         value: {
           error: 'The request body must have fields informed.',
@@ -658,6 +1333,11 @@ export const swaggerDoc = {
           error: "'123.456.789' is not a valid CPF or CNPJ.",
         },
       },
+      invalidCPF: {
+        value: {
+          error: "'123.456.789' is not a valid CPF.",
+        },
+      },
       invalidEmail: {
         value: {
           error: "'mail.email.com' is not a valid email.",
@@ -675,7 +1355,7 @@ export const swaggerDoc = {
         description: 'Unautorized',
         content: {
           'application/json': {
-            schema: { $ref: '#/components/responses/ResponseError' },
+            schema: { $ref: '#/components/responses/responseError' },
             examples: {
               requiredToken: {
                 value: {
@@ -714,7 +1394,7 @@ export const swaggerDoc = {
       //   description: 'Forbidden',
       //   content: {
       //     'application/json': {
-      //       schema: { $ref: '#/components/responses/ResponseError' },
+      //       schema: { $ref: '#/components/responses/responseError' },
       //       example: {
       //         error:
       //           'This content can only be accessed by employees of this bank.',
@@ -722,23 +1402,25 @@ export const swaggerDoc = {
       //     },
       //   },
       // },
-      // userAccessOnly: {
-      //   description: 'Forbidden',
-      //   content: {
-      //     'application/json': {
-      //       schema: { $ref: '#/components/responses/ResponseError' },
-      //       example: {
-      //         error:
-      //           'This content can only be accessed by employees of this bank.',
-      //       },
-      //     },
-      //   },
-      // },
+      userAccessOnly: {
+        description: 'Forbidden',
+        content: {
+          'application/json': {
+            schema: { $ref: '#/components/responses/responseError' },
+            example: {
+              error:
+                'This content can only be accessed by users without an ' +
+                'account at this bank. This change is carried out by our ' +
+                'support team through a ticket.',
+            },
+          },
+        },
+      },
       workerAccessOnly: {
         description: 'Forbidden',
         content: {
           'application/json': {
-            schema: { $ref: '#/components/responses/ResponseError' },
+            schema: { $ref: '#/components/responses/responseError' },
             example: {
               error:
                 'This content can only be accessed by employees of this bank.',
@@ -746,7 +1428,6 @@ export const swaggerDoc = {
           },
         },
       },
-
       //#endregion
 
       //#region responses code 404
@@ -754,7 +1435,7 @@ export const swaggerDoc = {
         description: 'Not Found',
         content: {
           'application/json': {
-            schema: { $ref: '#/components/responses/ResponseError' },
+            schema: { $ref: '#/components/responses/responseError' },
             example: {
               error: "User with CPF '123.456.789-09' not found.",
             },
@@ -768,7 +1449,7 @@ export const swaggerDoc = {
         description: 'Internal Server Error',
         content: {
           'application/json': {
-            schema: { $ref: '#/components/responses/ResponseError' },
+            schema: { $ref: '#/components/responses/responseError' },
             example: { error: 'An unexpected error has occurred.' },
           },
         },
