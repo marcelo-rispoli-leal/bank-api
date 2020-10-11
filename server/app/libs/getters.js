@@ -158,7 +158,6 @@ async function getAccounts(category = 'all') {
 
 async function getTotalAccounts(category = 'all') {
   const match = category === 'all' ? {} : { category };
-  const project = category === 'all' ? '-_id -category' : '-_id';
 
   let result = await Account.aggregate([
     { $match: match },
@@ -169,8 +168,7 @@ async function getTotalAccounts(category = 'all') {
         totalBalance: { $sum: '$balance' },
       },
     },
-    { $addFields: { category } },
-  ]).project(project);
+  ]).project('-_id');
 
   if (result.length === 0) {
     errors.accountsNotFound(category);
@@ -207,7 +205,7 @@ async function getTotalTransactions(type = 'D', period, category = 'all') {
     {
       $group: {
         _id: { $dateToString: { format, date: '$createdAt' } },
-        countTransactions: { $sum: 1 },
+        totalTransactions: { $sum: 1 },
         totalDebits: {
           $sum: {
             $cond: [{ $eq: ['$indicator', 'D'] }, '$value', 0],

@@ -61,10 +61,10 @@ function accountNumber(account) {
   return result;
 }
 
-function accountBody(reqBody) {
+function accountParam(reqParams) {
   //check body and load account
-  errors.requiredBody(reqBody);
-  let { account } = reqBody;
+  errors.requiredParams(reqParams);
+  let { account } = reqParams;
 
   //check required fields
   errors.requiredFields({ account });
@@ -81,5 +81,5 @@ export default {
   phoneNumberBR,
   moneyNumber,
   accountNumber,
-  accountBody,
+  accountParam,
 };

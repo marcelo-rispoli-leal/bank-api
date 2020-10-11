@@ -76,6 +76,9 @@ const createTransfer = async (req, res, next) => {
     //gets source account
     const sourceAccount = await getters.getAccountByUser(req.userId, '+_id');
 
+    //checks if source and destiny account are different
+    errors.invalidAccounts(sourceAccount._id, destinyAccount._id);
+
     //checks if balance in source account is enough
     errors.invalidTransaction(sourceAccount.balance, value);
 
@@ -211,8 +214,8 @@ function findOne(isWorker = false) {
         //checks access rights
         errors.workerAccessOnly(req.worker);
 
-        //checks body, loads and formats account or sends error
-        const account = parsers.accountBody(req.body);
+        //checks params, loads and formats account or sends error
+        const account = parsers.accountParam(req.params);
 
         //gets account by number
         result = await getters.getAccountByNumber(account, '-_id');
@@ -245,14 +248,14 @@ function findDetails(isWorker = false) {
         errors.workerAccessOnly(req.worker);
 
         //checks body, loads and formats account or sends error
-        account = parsers.accountBody(req.body);
+        account = parsers.accountParam(req.params);
 
         //gets account by number if worker
         account = await getters.getAccountByNumber(account, '-balance');
       }
       console.log(account);
-      //loads another body field
-      const { period } = req.body;
+      //loads request query
+      const { period } = req.query;
 
       //if informed, checks period
       period !== undefined && errors.invalidPeriod(period, 'D');
@@ -287,14 +290,14 @@ function findSummary(type, isWorker = false) {
         errors.workerAccessOnly(req.worker);
 
         //checks body, loads and formats account or sends error
-        account = parsers.accountBody(req.body);
+        account = parsers.accountParam(req.params);
 
         //gets account by number if worker access
         account = await getters.getAccountByNumber(account, '-balance');
       }
 
-      //loads another body field
-      const { period } = req.body;
+      //loads another query field
+      const { period } = req.query;
 
       //if informed, checks period
       period !== undefined && errors.invalidPeriod(period, type);
@@ -354,8 +357,8 @@ function findTotalTransactions(type, category) {
       //checks access rights
       errors.workerAccessOnly(req.worker);
 
-      //loads body field
-      const { period } = req.body;
+      //loads query field
+      const { period } = req.query;
 
       //if informed, checks period
       period !== undefined && errors.invalidPeriod(period, type);

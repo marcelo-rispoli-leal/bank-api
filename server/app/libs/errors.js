@@ -158,6 +158,15 @@ const invalidPhoneNumber = (number, isMobile = true) => {
   );
 };
 
+const invalidAccounts = (sourceAccount, destinyAccount) => {
+  if (sourceAccount === destinyAccount) {
+    msgError(
+      `Invalid accounts. The source and destiny accounts must be different, ` +
+        `but they are the same.`
+    );
+  }
+};
+
 const invalidTransaction = (balance, value) => {
   if (balance < value) {
     msgError(
@@ -312,6 +321,7 @@ export default {
   invalidCPF,
   invalidEmail,
   invalidPhoneNumber,
+  invalidAccounts,
   invalidTransaction,
   invalidPeriod,
   invalidUserPass,

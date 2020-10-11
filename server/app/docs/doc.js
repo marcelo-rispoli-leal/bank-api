@@ -30,6 +30,7 @@ export const swaggerDoc = {
     },
   ],
   paths: {
+    //#region auth tag
     '/auth/register': {
       post: {
         tags: ['auth'],
@@ -263,6 +264,9 @@ export const swaggerDoc = {
         },
       },
     },
+    //#endregion
+
+    //#region user tag
     '/user/details': {
       get: {
         tags: ['user'],
@@ -369,7 +373,7 @@ export const swaggerDoc = {
     '/user/list/{userCategory}': {
       get: {
         tags: ['user'],
-        summary: 'Workers gets a list of all users with a name filter.',
+        summary: 'Workers gets a list of users by category with a name filter.',
         description:
           'Workers gets a list of users with an optional name snippet filter.',
         parameters: [
@@ -769,13 +773,7 @@ export const swaggerDoc = {
                 schema: { $ref: '#/components/responses/responseError' },
                 examples: {
                   requiredBody: { $ref: '#/components/responses/requiredBody' },
-                  requiredField: {
-                    value: {
-                      error:
-                        "The field 'CPF' is required in this request, " +
-                        'but has been omitted.',
-                    },
-                  },
+                  requiredCPF: { $ref: '#/components/responses/requiredCPF' },
                   invalidCPF: { $ref: '#/components/responses/invalidCPF' },
                 },
               },
@@ -789,7 +787,7 @@ export const swaggerDoc = {
         security: [{ token: '' }],
       },
     },
-    '/user/setWorker/Revoke': {
+    '/user/setWorker/revoke': {
       patch: {
         tags: ['user'],
         summary: 'Worker revokes worker access privileges to a user.',
@@ -821,13 +819,7 @@ export const swaggerDoc = {
                 schema: { $ref: '#/components/responses/responseError' },
                 examples: {
                   requiredBody: { $ref: '#/components/responses/requiredBody' },
-                  requiredField: {
-                    value: {
-                      error:
-                        "The field 'CPF' is required in this request, " +
-                        'but has been omitted.',
-                    },
-                  },
+                  requiredCPF: { $ref: '#/components/responses/requiredCPF' },
                   invalidCPF: { $ref: '#/components/responses/invalidCPF' },
                 },
               },
@@ -881,6 +873,1184 @@ export const swaggerDoc = {
         security: [{ token: '' }],
       },
     },
+    //#endregion
+
+    //#region account tag
+    '/account/register': {
+      post: {
+        tags: ['account'],
+        summary: 'Account creation',
+        description: 'Worker creates a bank account to an user.',
+        requestBody: {
+          description: 'Request body for the worker creates an account.',
+          content: {
+            'application/json': {
+              schema: { $ref: '#/components/requestBodies/requiredCPForCNPJ' },
+            },
+          },
+        },
+        responses: {
+          200: {
+            description: 'OK',
+            content: {
+              'application/json': {
+                schema: { $ref: '#/components/responses/accountRegister' },
+              },
+            },
+          },
+          400: {
+            description: 'Bad Request',
+            content: {
+              'application/json': {
+                schema: { $ref: '#/components/responses/responseError' },
+                examples: {
+                  requiredBody: { $ref: '#/components/responses/requiredBody' },
+                  requiredCPForCNPJ: {
+                    $ref: '#/components/responses/requiredCPForCNPJ',
+                  },
+                  invalidCPForCNPJ: {
+                    $ref: '#/components/responses/invalidCPForCNPJ',
+                  },
+                  userAlreadyIsCustomer: {
+                    value: {
+                      error:
+                        "User with CPF '123.456.789-09' already is customer.",
+                    },
+                  },
+                  requiredPDF: {
+                    value: {
+                      error:
+                        "The user didn't upload a file. The account is " +
+                        'created after sending and approving the documentation.',
+                    },
+                  },
+                },
+              },
+            },
+          },
+          401: { $ref: '#/components/responses/authenticationError' },
+          403: { $ref: '#/components/responses/workerAccessOnly' },
+          404: { $ref: '#/components/responses/userNotFound' },
+          500: { $ref: '#/components/responses/unexpectedError' },
+        },
+        security: [{ token: '' }],
+      },
+    },
+    '/account/transfer': {
+      post: {
+        tags: ['account'],
+        summary: 'Transfer transaction creation',
+        description:
+          'The customer creates a transfer of values between accounts of this bank.',
+        requestBody: {
+          description: 'Request body for the customer creates a transfer.',
+          content: {
+            'application/json': {
+              schema: { $ref: '#/components/requestBodies/accountTransfer' },
+            },
+          },
+        },
+        responses: {
+          200: {
+            description: 'OK',
+            content: {
+              'application/json': {
+                schema: { $ref: '#/components/responses/accountTransfer' },
+              },
+            },
+          },
+          400: {
+            description: 'Bad Request',
+            content: {
+              'application/json': {
+                schema: { $ref: '#/components/responses/responseError' },
+                examples: {
+                  requiredBody: { $ref: '#/components/responses/requiredBody' },
+                  requiredFields: {
+                    value: {
+                      error:
+                        "The fields 'destinyAccount', 'value' are required in " +
+                        "this request, but the field 'value' has been omitted.",
+                    },
+                  },
+                  valueIsNaN: { $ref: '#/components/responses/valueIsNaN' },
+                  valueLessMinimum: {
+                    $ref: '#/components/responses/valueLessMinimum',
+                  },
+                  destinyAccountIsNaN: {
+                    value: {
+                      error:
+                        "The destiny account must be a number, but 'abcdefghi' is not.",
+                    },
+                  },
+                  destinyAccountLessMinimum: {
+                    value: {
+                      error:
+                        "The destiny account must be equal or greater than '100000000', " +
+                        "but '99999999' is not.",
+                    },
+                  },
+                  destinyAccountGreaterMaximum: {
+                    value: {
+                      error:
+                        "The destiny account must be equal or less than '999999999', " +
+                        "but '1000000000' is not.",
+                    },
+                  },
+                  invalidAccounts: {
+                    value: {
+                      error:
+                        'Invalid accounts. The source and destiny accounts ' +
+                        'must be different, but they are the same.',
+                    },
+                  },
+                  invalidTransaction: {
+                    $ref: '#/components/responses/invalidTransaction',
+                  },
+                },
+              },
+            },
+          },
+          401: { $ref: '#/components/responses/authenticationError' },
+          403: { $ref: '#/components/responses/customerAccessOnly' },
+          404: { $ref: '#/components/responses/accountNotFound' },
+          500: { $ref: '#/components/responses/unexpectedError' },
+        },
+        security: [{ token: '' }],
+      },
+    },
+    '/account/debit': {
+      post: {
+        tags: ['account'],
+        summary: 'Debit transaction creation',
+        description:
+          'The customer creates a debit of values in your bank account.' +
+          'We emphasize that this API was developed for sampling and testing. ' +
+          'We know that a customer does not directly debit his account, ' +
+          'he makes payments, withdrawals. This is just a fictional example.',
+        requestBody: {
+          description:
+            'Request body for the customer creates a debit transaction.',
+          content: {
+            'application/json': {
+              schema: { $ref: '#/components/requestBodies/requiredValue' },
+            },
+          },
+        },
+        responses: {
+          200: {
+            description: 'OK',
+            content: {
+              'application/json': {
+                schema: { $ref: '#/components/responses/accountDebit' },
+              },
+            },
+          },
+          400: {
+            description: 'Bad Request',
+            content: {
+              'application/json': {
+                schema: { $ref: '#/components/responses/responseError' },
+                examples: {
+                  requiredBody: { $ref: '#/components/responses/requiredBody' },
+                  requiredValue: {
+                    $ref: '#/components/responses/requiredValue',
+                  },
+                  valueIsNaN: { $ref: '#/components/responses/valueIsNaN' },
+                  valueLessMinimum: {
+                    $ref: '#/components/responses/valueLessMinimum',
+                  },
+                  invalidTransaction: {
+                    $ref: '#/components/responses/invalidTransaction',
+                  },
+                },
+              },
+            },
+          },
+          401: { $ref: '#/components/responses/authenticationError' },
+          403: { $ref: '#/components/responses/customerAccessOnly' },
+          500: { $ref: '#/components/responses/unexpectedError' },
+        },
+        security: [{ token: '' }],
+      },
+    },
+    '/account/credit': {
+      post: {
+        tags: ['account'],
+        summary: 'Credit transaction creation',
+        description:
+          'The customer creates a credit of values in your bank account.' +
+          'We emphasize that this API was developed for sampling and testing. ' +
+          'We know that a customer does not directly credit his account, he ' +
+          'makes deposits, receives transfers. This is just a fictional example.',
+        requestBody: {
+          description:
+            'Request body for the customer creates a credit transaction.',
+          content: {
+            'application/json': {
+              schema: { $ref: '#/components/requestBodies/requiredValue' },
+            },
+          },
+        },
+        responses: {
+          200: {
+            description: 'OK',
+            content: {
+              'application/json': {
+                schema: { $ref: '#/components/responses/accountCredit' },
+              },
+            },
+          },
+          400: {
+            description: 'Bad Request',
+            content: {
+              'application/json': {
+                schema: { $ref: '#/components/responses/responseError' },
+                examples: {
+                  requiredBody: { $ref: '#/components/responses/requiredBody' },
+                  requiredValue: {
+                    $ref: '#/components/responses/requiredValue',
+                  },
+                  valueIsNaN: { $ref: '#/components/responses/valueIsNaN' },
+                  valueLessMinimum: {
+                    $ref: '#/components/responses/valueLessMinimum',
+                  },
+                },
+              },
+            },
+          },
+          401: { $ref: '#/components/responses/authenticationError' },
+          403: { $ref: '#/components/responses/customerAccessOnly' },
+          500: { $ref: '#/components/responses/unexpectedError' },
+        },
+        security: [{ token: '' }],
+      },
+    },
+    '/account/balance': {
+      get: {
+        tags: ['account'],
+        summary: 'Customer gets his available balance.',
+        description:
+          'The customer gets the balance available in his own account.',
+        responses: {
+          200: {
+            description: 'OK',
+            content: {
+              'application/json': {
+                schema: { $ref: '#/components/responses/accountBalance' },
+              },
+            },
+          },
+          401: { $ref: '#/components/responses/authenticationError' },
+          403: { $ref: '#/components/responses/customerAccessOnly' },
+          500: { $ref: '#/components/responses/unexpectedError' },
+        },
+        security: [{ token: '' }],
+      },
+    },
+    '/account/balance/{accountNumber}': {
+      get: {
+        tags: ['account'],
+        summary: 'Worker gets the available balance of an account.',
+        description:
+          'The worker gets the balance available in a customer account.',
+        parameters: [{ $ref: '#/components/parameters/accountNumber' }],
+        responses: {
+          200: {
+            description: 'OK',
+            content: {
+              'application/json': {
+                schema: { $ref: '#/components/responses/customerBalance' },
+              },
+            },
+          },
+          400: {
+            description: 'Bad Request',
+            content: {
+              'application/json': {
+                schema: { $ref: '#/components/responses/responseError' },
+                examples: {
+                  requiredParams: {
+                    $ref: '#/components/responses/requiredParams',
+                  },
+                  requiredAccount: {
+                    $ref: '#/components/responses/requiredAccount',
+                  },
+                  accountIsNaN: { $ref: '#/components/responses/accountIsNaN' },
+                  accountLessMinimum: {
+                    $ref: '#/components/responses/accountLessMinimum',
+                  },
+                  accountGreaterMaximum: {
+                    $ref: '#/components/responses/accountGreaterMaximum',
+                  },
+                },
+              },
+            },
+          },
+          401: { $ref: '#/components/responses/authenticationError' },
+          403: { $ref: '#/components/responses/workerAccessOnly' },
+          404: { $ref: '#/components/responses/accountNotFound' },
+          500: { $ref: '#/components/responses/unexpectedError' },
+        },
+        security: [{ token: '' }],
+      },
+    },
+    '/account/details': {
+      get: {
+        tags: ['account'],
+        summary:
+          'Customer gets the account transactions in the current or informed period.',
+        description:
+          'The customer gets the detail of the transactions from his own account ' +
+          'in the current or informed period.',
+        parameters: [
+          { $ref: '#/components/parameters/accountNumber' },
+          { $ref: '#/components/parameters/period' },
+        ],
+        responses: {
+          200: {
+            description: 'OK',
+            content: {
+              'application/json': {
+                schema: { $ref: '#/components/responses/accountDetails' },
+              },
+            },
+          },
+          400: {
+            description: 'Bad Request',
+            content: {
+              'application/json': {
+                schema: { $ref: '#/components/responses/responseError' },
+                examples: {
+                  invalidPeriod: {
+                    $ref: '#/components/responses/invalidPeriod',
+                  },
+                  periodIsNaD: { $ref: '#/components/responses/periodIsNaD' },
+                },
+              },
+            },
+          },
+          401: { $ref: '#/components/responses/authenticationError' },
+          403: { $ref: '#/components/responses/customerAccessOnly' },
+          404: {
+            $ref: '#/components/responses/transactionsByAccountInMonthNotFound',
+          },
+          500: { $ref: '#/components/responses/unexpectedError' },
+        },
+        security: [{ token: '' }],
+      },
+    },
+    '/account/details/{accountNumber}': {
+      get: {
+        tags: ['account'],
+        summary:
+          'Worker gets the transactions of an account ' +
+          'in the current or informed period.',
+        description:
+          'The worker gets the detail of the transactions of a customer account ' +
+          'in the current or informed period.',
+        parameters: [{ $ref: '#/components/parameters/accountNumber' }],
+        responses: {
+          200: {
+            description: 'OK',
+            content: {
+              'application/json': {
+                schema: { $ref: '#/components/responses/accountDetails' },
+              },
+            },
+          },
+          400: {
+            description: 'Bad Request',
+            content: {
+              'application/json': {
+                schema: { $ref: '#/components/responses/responseError' },
+                examples: {
+                  requiredParams: {
+                    $ref: '#/components/responses/requiredParams',
+                  },
+                  requiredAccount: {
+                    $ref: '#/components/responses/requiredAccount',
+                  },
+                  accountIsNaN: { $ref: '#/components/responses/accountIsNaN' },
+                  accountLessMinimum: {
+                    $ref: '#/components/responses/accountLessMinimum',
+                  },
+                  accountGreaterMaximum: {
+                    $ref: '#/components/responses/accountGreaterMaximum',
+                  },
+                  invalidPeriod: {
+                    $ref: '#/components/responses/invalidPeriod',
+                  },
+                  periodIsNaD: { $ref: '#/components/responses/periodIsNaD' },
+                },
+              },
+            },
+          },
+          401: { $ref: '#/components/responses/authenticationError' },
+          403: { $ref: '#/components/responses/workerAccessOnly' },
+          404: {
+            $ref: '#/components/responses/accountTransactionsInMonthNotFound',
+          },
+          500: { $ref: '#/components/responses/unexpectedError' },
+        },
+        security: [{ token: '' }],
+      },
+    },
+    '/account/summary/daily': {
+      get: {
+        tags: ['account'],
+        summary:
+          'Customer gets the daily summary of transactions ' +
+          'in the current or informed period.',
+        description:
+          'The customer gets the daily summary of the transactions from ' +
+          'his own account in the current or informed period.',
+        parameters: [{ $ref: '#/components/parameters/period' }],
+        responses: {
+          200: {
+            description: 'OK',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/responses/accountSummaryDaily',
+                },
+              },
+            },
+          },
+          400: {
+            description: 'Bad Request',
+            content: {
+              'application/json': {
+                schema: { $ref: '#/components/responses/responseError' },
+                examples: {
+                  invalidPeriod: {
+                    $ref: '#/components/responses/invalidPeriod',
+                  },
+                  periodIsNaD: { $ref: '#/components/responses/periodIsNaD' },
+                },
+              },
+            },
+          },
+          401: { $ref: '#/components/responses/authenticationError' },
+          403: { $ref: '#/components/responses/customerAccessOnly' },
+          404: {
+            $ref: '#/components/responses/transactionsByAccountInMonthNotFound',
+          },
+          500: { $ref: '#/components/responses/unexpectedError' },
+        },
+        security: [{ token: '' }],
+      },
+    },
+    '/account/summary/daily/{accountNumber}': {
+      get: {
+        tags: ['account'],
+        summary:
+          'Worker gets the daily summary of transactions of an account ' +
+          'in the current or informed period.',
+        description:
+          'The worker gets the daily summary of the transactions of a customer ' +
+          'account in the current or informed period.',
+        parameters: [
+          { $ref: '#/components/parameters/accountNumber' },
+          { $ref: '#/components/parameters/period' },
+        ],
+        responses: {
+          200: {
+            description: 'OK',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/responses/accountSummaryDaily',
+                },
+              },
+            },
+          },
+          400: {
+            description: 'Bad Request',
+            content: {
+              'application/json': {
+                schema: { $ref: '#/components/responses/responseError' },
+                examples: {
+                  requiredParams: {
+                    $ref: '#/components/responses/requiredParams',
+                  },
+                  requiredAccount: {
+                    $ref: '#/components/responses/requiredAccount',
+                  },
+                  accountIsNaN: { $ref: '#/components/responses/accountIsNaN' },
+                  accountLessMinimum: {
+                    $ref: '#/components/responses/accountLessMinimum',
+                  },
+                  accountGreaterMaximum: {
+                    $ref: '#/components/responses/accountGreaterMaximum',
+                  },
+                  invalidPeriod: {
+                    $ref: '#/components/responses/invalidPeriod',
+                  },
+                  periodIsNaD: { $ref: '#/components/responses/periodIsNaD' },
+                },
+              },
+            },
+          },
+          401: { $ref: '#/components/responses/authenticationError' },
+          403: { $ref: '#/components/responses/workerAccessOnly' },
+          404: {
+            $ref: '#/components/responses/accountTransactionsInMonthNotFound',
+          },
+          500: { $ref: '#/components/responses/unexpectedError' },
+        },
+        security: [{ token: '' }],
+      },
+    },
+    '/account/summary/monthly': {
+      get: {
+        tags: ['account'],
+        summary:
+          'Customer gets the monthly summary of transactions ' +
+          'in the current or informed year.',
+        description:
+          'The customer gets the monthly summary of the transactions from ' +
+          'his own account in the current or informed year.',
+        parameters: [{ $ref: '#/components/parameters/year' }],
+        responses: {
+          200: {
+            description: 'OK',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/responses/accountSummaryMonthly',
+                },
+              },
+            },
+          },
+          400: {
+            description: 'Bad Request',
+            content: {
+              'application/json': {
+                schema: { $ref: '#/components/responses/responseError' },
+                examples: {
+                  invalidYear: {
+                    $ref: '#/components/responses/invalidYear',
+                  },
+                  yearIsNaD: { $ref: '#/components/responses/yearIsNaD' },
+                },
+              },
+            },
+          },
+          401: { $ref: '#/components/responses/authenticationError' },
+          403: { $ref: '#/components/responses/customerAccessOnly' },
+          404: {
+            $ref: '#/components/responses/transactionsByAccountInYearNotFound',
+          },
+          500: { $ref: '#/components/responses/unexpectedError' },
+        },
+        security: [{ token: '' }],
+      },
+    },
+    '/account/summary/monthly/{accountNumber}': {
+      get: {
+        tags: ['account'],
+        summary:
+          'Worker gets the monthly summary of transactions of an account ' +
+          'in the current or informed year.',
+        description:
+          'The worker gets the monthly summary of the transactions of a customer ' +
+          'account in the current or informed year.',
+        parameters: [
+          { $ref: '#/components/parameters/accountNumber' },
+          { $ref: '#/components/parameters/year' },
+        ],
+        responses: {
+          200: {
+            description: 'OK',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/responses/accountSummaryMonthly',
+                },
+              },
+            },
+          },
+          400: {
+            description: 'Bad Request',
+            content: {
+              'application/json': {
+                schema: { $ref: '#/components/responses/responseError' },
+                examples: {
+                  requiredParams: {
+                    $ref: '#/components/responses/requiredParams',
+                  },
+                  requiredAccount: {
+                    $ref: '#/components/responses/requiredAccount',
+                  },
+                  accountIsNaN: { $ref: '#/components/responses/accountIsNaN' },
+                  accountLessMinimum: {
+                    $ref: '#/components/responses/accountLessMinimum',
+                  },
+                  accountGreaterMaximum: {
+                    $ref: '#/components/responses/accountGreaterMaximum',
+                  },
+                  invalidYear: {
+                    $ref: '#/components/responses/invalidYear',
+                  },
+                  yearIsNaD: { $ref: '#/components/responses/yearIsNaD' },
+                },
+              },
+            },
+          },
+          401: { $ref: '#/components/responses/authenticationError' },
+          403: { $ref: '#/components/responses/workerAccessOnly' },
+          404: {
+            $ref: '#/components/responses/accountTransactionsInYearNotFound',
+          },
+          500: { $ref: '#/components/responses/unexpectedError' },
+        },
+        security: [{ token: '' }],
+      },
+    },
+    '/account/summary/yearly': {
+      get: {
+        tags: ['account'],
+        summary:
+          'Customer gets the annual summary of transactions ' +
+          'in the current or informed year.',
+        description:
+          'The customer gets the annual summary of the transactions from ' +
+          'his own account in the current or informed year.',
+        parameters: [{ $ref: '#/components/parameters/year' }],
+        responses: {
+          200: {
+            description: 'OK',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/responses/accountSummaryYearly',
+                },
+              },
+            },
+          },
+          400: {
+            description: 'Bad Request',
+            content: {
+              'application/json': {
+                schema: { $ref: '#/components/responses/responseError' },
+                examples: {
+                  invalidYear: {
+                    $ref: '#/components/responses/invalidYear',
+                  },
+                  yearIsNaD: { $ref: '#/components/responses/yearIsNaD' },
+                },
+              },
+            },
+          },
+          401: { $ref: '#/components/responses/authenticationError' },
+          403: { $ref: '#/components/responses/customerAccessOnly' },
+          404: {
+            $ref: '#/components/responses/transactionsByAccountInYearNotFound',
+          },
+          500: { $ref: '#/components/responses/unexpectedError' },
+        },
+        security: [{ token: '' }],
+      },
+    },
+    '/account/summary/yearly/{accountNumber}': {
+      get: {
+        tags: ['account'],
+        summary:
+          'Worker gets the annual summary of transactions of an account ' +
+          'in the current or informed year.',
+        description:
+          'The worker gets the annual summary of the transactions of a customer ' +
+          'account in the current or informed year.',
+        parameters: [
+          { $ref: '#/components/parameters/accountNumber' },
+          { $ref: '#/components/parameters/year' },
+        ],
+        responses: {
+          200: {
+            description: 'OK',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/responses/accountSummaryYearly',
+                },
+              },
+            },
+          },
+          400: {
+            description: 'Bad Request',
+            content: {
+              'application/json': {
+                schema: { $ref: '#/components/responses/responseError' },
+                examples: {
+                  requiredParams: {
+                    $ref: '#/components/responses/requiredParams',
+                  },
+                  requiredAccount: {
+                    $ref: '#/components/responses/requiredAccount',
+                  },
+                  accountIsNaN: { $ref: '#/components/responses/accountIsNaN' },
+                  accountLessMinimum: {
+                    $ref: '#/components/responses/accountLessMinimum',
+                  },
+                  accountGreaterMaximum: {
+                    $ref: '#/components/responses/accountGreaterMaximum',
+                  },
+                  invalidYear: {
+                    $ref: '#/components/responses/invalidYear',
+                  },
+                  yearIsNaD: { $ref: '#/components/responses/yearIsNaD' },
+                },
+              },
+            },
+          },
+          401: { $ref: '#/components/responses/authenticationError' },
+          403: { $ref: '#/components/responses/workerAccessOnly' },
+          404: {
+            $ref: '#/components/responses/accountTransactionsInYearNotFound',
+          },
+          500: { $ref: '#/components/responses/unexpectedError' },
+        },
+        security: [{ token: '' }],
+      },
+    },
+    '/account/list': {
+      get: {
+        tags: ['account'],
+        summary: 'Worker gets the list of all bank accounts and balances.',
+        description:
+          'The worker gets the list of all bank accounts ' +
+          'with their respective balance.',
+        responses: {
+          200: {
+            description: 'OK',
+            content: {
+              'application/json': {
+                schema: { $ref: '#/components/responses/accountList' },
+              },
+            },
+          },
+          401: { $ref: '#/components/responses/authenticationError' },
+          403: { $ref: '#/components/responses/workerAccessOnly' },
+          404: { $ref: '#/components/responses/accountsNotFound' },
+          500: { $ref: '#/components/responses/unexpectedError' },
+        },
+        security: [{ token: '' }],
+      },
+    },
+    '/account/list/{accountCategory}': {
+      get: {
+        tags: ['account'],
+        summary:
+          'Worker gets the list of bank accounts and balances by category.',
+        description:
+          'The worker gets the list of bank accounts with their ' +
+          'respective balance acording with the informed category.',
+        parameters: [{ $ref: '#/components/parameters/accountCategory' }],
+        responses: {
+          200: {
+            description: 'OK',
+            content: {
+              'application/json': {
+                schema: { $ref: '#/components/responses/accountList' },
+              },
+            },
+          },
+          401: { $ref: '#/components/responses/authenticationError' },
+          403: { $ref: '#/components/responses/workerAccessOnly' },
+          404: {
+            description: 'Not Found',
+            content: {
+              'application/json': {
+                schema: { $ref: '#/components/responses/accountList' },
+                examples: {
+                  PFaccountsNotFound: {
+                    $ref: '#/components/responses/PFaccountsNotFound',
+                  },
+                  PJaccountsNotFound: {
+                    $ref: '#/components/responses/PJaccountsNotFound',
+                  },
+                },
+              },
+            },
+          },
+          500: { $ref: '#/components/responses/unexpectedError' },
+        },
+        security: [{ token: '' }],
+      },
+    },
+    '/account/total/balance': {
+      get: {
+        tags: ['account'],
+        summary: 'Worker gets the total balance of all accounts.',
+        description: 'The worker gets the total balance of all bank accounts.',
+        responses: {
+          200: {
+            description: 'OK',
+            content: {
+              'application/json': {
+                schema: { $ref: '#/components/responses/accountTotal' },
+              },
+            },
+          },
+          401: { $ref: '#/components/responses/authenticationError' },
+          403: { $ref: '#/components/responses/workerAccessOnly' },
+          404: { $ref: '#/components/responses/accountsNotFound' },
+          500: { $ref: '#/components/responses/unexpectedError' },
+        },
+        security: [{ token: '' }],
+      },
+    },
+    '/account/total/balance/{accountCategory}': {
+      get: {
+        tags: ['account'],
+        summary: 'Worker gets the total balance of accounts in a category.',
+        description:
+          'The worker gets the total balance of bank accounts in a category.',
+        parameters: [{ $ref: '#/components/parameters/accountCategory' }],
+        responses: {
+          200: {
+            description: 'OK',
+            content: {
+              'application/json': {
+                schema: { $ref: '#/components/responses/accountTotal' },
+              },
+            },
+          },
+          401: { $ref: '#/components/responses/authenticationError' },
+          403: { $ref: '#/components/responses/workerAccessOnly' },
+          404: {
+            description: 'OK',
+            content: {
+              'application/json': {
+                schema: { $ref: '#/components/responses/responseError' },
+                examples: {
+                  PFaccountsNotFound: {
+                    $ref: '#/components/responses/PFaccountsNotFound',
+                  },
+                  PJaccountsNotFound: {
+                    $ref: '#/components/responses/PJaccountsNotFound',
+                  },
+                },
+              },
+            },
+          },
+          500: { $ref: '#/components/responses/unexpectedError' },
+        },
+        security: [{ token: '' }],
+      },
+    },
+    '/account/total/daily': {
+      get: {
+        tags: ['account'],
+        summary:
+          'Worker gets the daily total of transactions in all accounts ' +
+          'in the current or informed period.',
+        description:
+          'The worker gets the daily total of transactions considering ' +
+          'all bank accounts in the current or informed period.',
+        parameters: [{ $ref: '#/components/parameters/period' }],
+        responses: {
+          200: {
+            description: 'OK',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/responses/accountTotalDaily',
+                },
+              },
+            },
+          },
+          400: {
+            description: 'Bad Request',
+            content: {
+              'application/json': {
+                schema: { $ref: '#/components/responses/responseError' },
+                examples: {
+                  invalidPeriod: {
+                    $ref: '#/components/responses/invalidPeriod',
+                  },
+                  periodIsNaD: { $ref: '#/components/responses/periodIsNaD' },
+                },
+              },
+            },
+          },
+          401: { $ref: '#/components/responses/authenticationError' },
+          403: { $ref: '#/components/responses/workerAccessOnly' },
+          404: {
+            description: 'Not Found',
+            content: {
+              'application/json': {
+                schema: { $ref: '#/components/responses/responseError' },
+                example: {
+                  error:
+                    "Transactions not found in the month '2020-09' and " +
+                    "category 'all'.",
+                },
+              },
+            },
+          },
+          500: { $ref: '#/components/responses/unexpectedError' },
+        },
+        security: [{ token: '' }],
+      },
+    },
+    '/account/total/daily/{accountCategory}': {
+      get: {
+        tags: ['account'],
+        summary:
+          'Worker gets the daily total of transactions in a category of accounts ' +
+          'in the current or informed period.',
+        description:
+          'The worker gets the daily total of transactions considering ' +
+          'a categoy of bank accounts in the current or informed period.',
+        parameters: [
+          { $ref: '#/components/parameters/accountCategory' },
+          { $ref: '#/components/parameters/period' },
+        ],
+        responses: {
+          200: {
+            description: 'OK',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/responses/accountTotalDaily',
+                },
+              },
+            },
+          },
+          400: {
+            description: 'Bad Request',
+            content: {
+              'application/json': {
+                schema: { $ref: '#/components/responses/responseError' },
+                examples: {
+                  invalidPeriod: {
+                    $ref: '#/components/responses/invalidPeriod',
+                  },
+                  periodIsNaD: { $ref: '#/components/responses/periodIsNaD' },
+                },
+              },
+            },
+          },
+          401: { $ref: '#/components/responses/authenticationError' },
+          403: { $ref: '#/components/responses/workerAccessOnly' },
+          404: {
+            description: 'Not Found',
+            content: {
+              'application/json': {
+                schema: { $ref: '#/components/responses/responseError' },
+                examples: {
+                  PFtransactionsNotFound: {
+                    value: {
+                      error:
+                        "Transactions not found in the month '2020-09' and " +
+                        "category 'PF'.",
+                    },
+                  },
+                  PJtransactionsNotFound: {
+                    value: {
+                      error:
+                        "Transactions not found in the month '2020-09' and " +
+                        "category 'PJ'.",
+                    },
+                  },
+                },
+              },
+            },
+          },
+          500: { $ref: '#/components/responses/unexpectedError' },
+        },
+        security: [{ token: '' }],
+      },
+    },
+    '/account/total/monthly': {
+      get: {
+        tags: ['account'],
+        summary:
+          'Worker gets the monthly total of transactions in all accounts ' +
+          'in the current or informed period.',
+        description:
+          'The worker gets the monthly total of transactions considering ' +
+          'all bank accounts in the current or informed period.',
+        parameters: [{ $ref: '#/components/parameters/year' }],
+        responses: {
+          200: {
+            description: 'OK',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/responses/accountTotalMonthly',
+                },
+              },
+            },
+          },
+          400: {
+            description: 'Bad Request',
+            content: {
+              'application/json': {
+                schema: { $ref: '#/components/responses/responseError' },
+                examples: {
+                  invalidYear: {
+                    $ref: '#/components/responses/invalidYear',
+                  },
+                  yearIsNaD: { $ref: '#/components/responses/yearIsNaD' },
+                },
+              },
+            },
+          },
+          401: { $ref: '#/components/responses/authenticationError' },
+          403: { $ref: '#/components/responses/workerAccessOnly' },
+          404: {
+            $ref: '#/components/responses/accountTotalInYearNotFound',
+          },
+          500: { $ref: '#/components/responses/unexpectedError' },
+        },
+        security: [{ token: '' }],
+      },
+    },
+    '/account/total/monthly/{accountCategory}': {
+      get: {
+        tags: ['account'],
+        summary:
+          'Worker gets the monthly total of transactions in a category of accounts ' +
+          'in the current or informed period.',
+        description:
+          'The worker gets the monthly total of transactions considering ' +
+          'a categoy of bank accounts in the current or informed period.',
+        parameters: [
+          { $ref: '#/components/parameters/accountCategory' },
+          { $ref: '#/components/parameters/year' },
+        ],
+        responses: {
+          200: {
+            description: 'OK',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/responses/accountTotalMonthly',
+                },
+              },
+            },
+          },
+          400: {
+            description: 'Bad Request',
+            content: {
+              'application/json': {
+                schema: { $ref: '#/components/responses/responseError' },
+                examples: {
+                  invalidYear: {
+                    $ref: '#/components/responses/invalidYear',
+                  },
+                  yearIsNaD: { $ref: '#/components/responses/yearIsNaD' },
+                },
+              },
+            },
+          },
+          401: { $ref: '#/components/responses/authenticationError' },
+          403: { $ref: '#/components/responses/workerAccessOnly' },
+          404: {
+            $ref: '#/components/responses/accountTotalInYearByCategoryNotFound',
+          },
+          500: { $ref: '#/components/responses/unexpectedError' },
+        },
+        security: [{ token: '' }],
+      },
+    },
+    '/account/total/yearly': {
+      get: {
+        tags: ['account'],
+        summary:
+          'Worker gets the annual total of transactions in all accounts ' +
+          'in the current or informed period.',
+        description:
+          'The worker gets the annual total of transactions considering ' +
+          'all bank accounts in the current or informed period.',
+        parameters: [{ $ref: '#/components/parameters/year' }],
+        responses: {
+          200: {
+            description: 'OK',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/responses/accountTotalYearly',
+                },
+              },
+            },
+          },
+          400: {
+            description: 'Bad Request',
+            content: {
+              'application/json': {
+                schema: { $ref: '#/components/responses/responseError' },
+                examples: {
+                  invalidYear: {
+                    $ref: '#/components/responses/invalidYear',
+                  },
+                  yearIsNaD: { $ref: '#/components/responses/yearIsNaD' },
+                },
+              },
+            },
+          },
+          401: { $ref: '#/components/responses/authenticationError' },
+          403: { $ref: '#/components/responses/workerAccessOnly' },
+          404: {
+            $ref: '#/components/responses/accountTotalInYearNotFound',
+          },
+          500: { $ref: '#/components/responses/unexpectedError' },
+        },
+        security: [{ token: '' }],
+      },
+    },
+    '/account/total/yearly/{accountCategory}': {
+      get: {
+        tags: ['account'],
+        summary:
+          'Worker gets the annual total of transactions in a category of accounts ' +
+          'in the current or informed period.',
+        description:
+          'The worker gets the annual total of transactions considering ' +
+          'a categoy of bank accounts in the current or informed period.',
+        parameters: [
+          { $ref: '#/components/parameters/accountCategory' },
+          { $ref: '#/components/parameters/year' },
+        ],
+        responses: {
+          200: {
+            description: 'OK',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/responses/accountTotalYearly',
+                },
+              },
+            },
+          },
+          400: {
+            description: 'Bad Request',
+            content: {
+              'application/json': {
+                schema: { $ref: '#/components/responses/responseError' },
+                examples: {
+                  invalidYear: {
+                    $ref: '#/components/responses/invalidYear',
+                  },
+                  yearIsNaD: { $ref: '#/components/responses/yearIsNaD' },
+                },
+              },
+            },
+          },
+          401: { $ref: '#/components/responses/authenticationError' },
+          403: { $ref: '#/components/responses/workerAccessOnly' },
+          404: {
+            $ref: '#/components/responses/accountTotalInYearByCategoryNotFound',
+          },
+          500: { $ref: '#/components/responses/unexpectedError' },
+        },
+        security: [{ token: '' }],
+      },
+    },
+    //#endregion
   },
   components: {
     requestBodies: {
@@ -905,6 +2075,7 @@ export const swaggerDoc = {
       email: {
         name: 'email',
         type: 'string',
+        format: 'email',
         description: "User's email. This data is validated.",
         example: 'jsilva@mail.com',
       },
@@ -950,6 +2121,20 @@ export const swaggerDoc = {
           'CPF is the Brazilian code for individuals (physical persons). ' +
           'This code is unique for each person and is validated in our API.',
         example: '123.456.789-09',
+      },
+      value: {
+        name: 'value',
+        type: 'number',
+        description: 'The transaction amount.',
+        minimum: 0.01,
+        example: 0.01,
+      },
+      destinyAccount: {
+        name: 'destinyAccount',
+        type: 'integer',
+        format: 'int32',
+        description: 'The bank transfer destination account number.',
+        example: 100000001,
       },
       //#endregion
 
@@ -1021,6 +2206,14 @@ export const swaggerDoc = {
           file: { $ref: '#/components/requestBodies/file' },
         },
       },
+      accountTransfer: {
+        type: 'object',
+        required: ['value', 'destinyAccount'],
+        properties: {
+          value: { $ref: '#/components/requestBodies/value' },
+          destinyAccount: { $ref: '#/components/requestBodies/destinyAccount' },
+        },
+      },
       requiredCPForCNPJ: {
         type: 'object',
         required: ['CPForCNPJ'],
@@ -1030,9 +2223,16 @@ export const swaggerDoc = {
       },
       requiredCPF: {
         type: 'object',
-        required: ['CPForCNPJ'],
+        required: ['CPF'],
         properties: {
           CPF: { $ref: '#/components/requestBodies/CPF' },
+        },
+      },
+      requiredValue: {
+        type: 'object',
+        required: ['value'],
+        properties: {
+          value: { $ref: '#/components/requestBodies/value' },
         },
       },
       //#endregion
@@ -1047,14 +2247,6 @@ export const swaggerDoc = {
           $ref: '#/components/requestBodies/CPForCNPJ/description',
         },
       },
-      nameSnippet: {
-        in: 'query',
-        required: false,
-        name: 'name',
-        schema: { type: 'string' },
-        description:
-          'Filters users by name snippet without case-sensitive search.',
-      },
       userCategory: {
         in: 'path',
         required: true,
@@ -1066,6 +2258,50 @@ export const swaggerDoc = {
         schema: {
           type: 'string',
           enum: ['PF', 'PJ', 'worker', 'unchecked'],
+        },
+      },
+      accountCategory: {
+        in: 'path',
+        required: true,
+        name: 'accountCategory',
+        description:
+          'Worker filters accounts according to their category: ' +
+          'PF - Physical Persons, PJ - Juridical Persons.',
+        schema: {
+          type: 'string',
+          enum: ['PF', 'PJ'],
+        },
+      },
+      accountNumber: {
+        in: 'path',
+        required: true,
+        name: 'account',
+        schema: { $ref: '#/components/responses/account' },
+        description: {
+          $ref: '#/components/responses/account/description',
+        },
+      },
+      nameSnippet: {
+        in: 'query',
+        name: 'name',
+        schema: { type: 'string' },
+        description:
+          'Filters users by name snippet without case-sensitive search.',
+      },
+      period: {
+        in: 'query',
+        name: 'period',
+        schema: { $ref: '#/components/responses/period' },
+        description: {
+          $ref: '#/components/responses/period/description',
+        },
+      },
+      year: {
+        in: 'query',
+        name: 'period',
+        schema: { $ref: '#/components/responses/year' },
+        description: {
+          $ref: '#/components/responses/year/description',
         },
       },
     },
@@ -1111,8 +2347,7 @@ export const swaggerDoc = {
       },
       workerFalse: {
         name: 'worker',
-        description:
-          'Indicates whether the user has bank employee access privilege.',
+        description: { $ref: '#/components/responses/workerTrue/description' },
         type: 'boolean',
         example: false,
       },
@@ -1146,6 +2381,192 @@ export const swaggerDoc = {
           "You didn't upload the PDF file. The account is " +
           'created after sending and approving the documentation.',
       },
+      account: {
+        name: 'account',
+        type: 'integer',
+        format: 'int32',
+        description: 'A bank account number.',
+        example: 100000000,
+      },
+      balance: {
+        name: 'balance',
+        type: 'number',
+        description: 'The balance available in a bank account.',
+        example: 0,
+      },
+      customer: {
+        name: 'customer',
+        type: 'string',
+        description: 'The CPF or CNPJ of a Brazilian customer.',
+        example: '123.456.789-09',
+      },
+      customerName: {
+        name: 'customerName',
+        type: 'string',
+        description: 'The full name of a Brazilian customer.',
+        example: 'João Silva',
+      },
+      period: {
+        name: 'period',
+        type: 'string',
+        description: "The year and month in 'yyyy-mm' format.",
+        example: '2020-09',
+      },
+      date: {
+        name: 'date',
+        type: 'string',
+        description: "A complete date in 'yyyy-mm-dd' format.",
+        example: '2020-09-30',
+      },
+      year: {
+        name: 'year',
+        type: 'string',
+        description: "A year in the format 'yyyy'.",
+        example: '2020',
+      },
+      indicator: {
+        name: 'indicator',
+        type: 'string',
+        description: 'The indicator of a transaction: D - Debit, C - Credit.',
+      },
+      description: {
+        name: 'description',
+        type: 'string',
+        description: 'The description of a transaction.',
+      },
+      previousBalance: {
+        name: 'previousBalance',
+        type: 'number',
+        description: 'The balance of the account before the transaction.',
+        example: 1000,
+      },
+      currentBalance: {
+        name: 'currentBalance',
+        type: 'number',
+        description: 'The balance of the account after the transaction.',
+      },
+      sourceAccount: {
+        name: 'sourceAccount',
+        type: 'integer',
+        format: 'int32',
+        description: 'The bank transfer source account number.',
+        example: 100000000,
+      },
+      sourceCustomerName: {
+        name: 'sourceCustomerName',
+        type: 'string',
+        description: 'The full name of the bank transfer originating customer.',
+        example: 'João Silva',
+      },
+      destinyCustomerName: {
+        name: 'destinyCustomerName',
+        type: 'string',
+        description: 'The full name of the bank transfer destination customer.',
+        example: 'José da Silva',
+      },
+      sourcePreviousBalance: {
+        name: 'sourcePreviousBalance',
+        type: 'number',
+        description: 'The balance of the source account before the transfer.',
+        example: 1000,
+      },
+      sourceCurrentBalance: {
+        name: 'sourceCurrentBalance',
+        type: 'number',
+        description: 'The balance of the source account after the transfer.',
+        example: 999.99,
+      },
+      debitCurrentBalance: {
+        name: 'currentBalance',
+        type: 'number',
+        description: {
+          $ref: '#/components/responses/currentBalance/description',
+        },
+        example: 999.99,
+      },
+      debitIndicator: {
+        name: 'indicator',
+        type: 'string',
+        description: { $ref: '#/components/responses/indicator/description' },
+        example: 'D',
+      },
+      debitDescription: {
+        name: 'description',
+        type: 'string',
+        description: { $ref: '#/components/responses/description/description' },
+        example: 'DIRECT DEBIT',
+      },
+      creditCurrentBalance: {
+        name: 'currentBalance',
+        type: 'number',
+        description: {
+          $ref: '#/components/responses/currentBalance/description',
+        },
+        example: 1000.01,
+      },
+      creditIndicator: {
+        name: 'indicator',
+        type: 'string',
+        description: { $ref: '#/components/responses/indicator/description' },
+        example: 'C',
+      },
+      creditDescription: {
+        name: 'description',
+        type: 'string',
+        description: { $ref: '#/components/responses/description/description' },
+        example: 'DIRECT CREDIT',
+      },
+      totalTransactions: {
+        name: 'totalTransactions',
+        type: 'integer',
+        format: 'int32',
+        description: 'The total number of transactions.',
+        example: 1,
+      },
+      initialBalance: {
+        name: 'initialBalance',
+        type: 'number',
+        description: 'The opening balance amount.',
+        example: 1000,
+      },
+      totalDebits: {
+        name: 'totalDebits',
+        type: 'number',
+        description: 'The total amount of debits.',
+        example: 0.01,
+      },
+      totalCredits: {
+        name: 'totalCredits',
+        type: 'number',
+        description: 'The total amount of credits.',
+        example: 0,
+      },
+      finalBalance: {
+        name: 'finalBalance',
+        type: 'number',
+        description: 'The final balance amount.',
+        example: 999.99,
+      },
+      totalAccounts: {
+        name: 'totalAccounts',
+        type: 'integer',
+        format: 'int32',
+        description: 'The total number of accounts.',
+        example: 1,
+      },
+      totalBalance: {
+        name: 'totalBalance',
+        type: 'number',
+        description: 'The total current balance available.',
+        example: 1000,
+      },
+      totalDifference: {
+        name: 'totalDifference',
+        type: 'number',
+        description:
+          'The total amount of debits minus the total amount of credits.',
+        example: 0.01,
+      },
       //#endregion
 
       //#region response code 200
@@ -1167,7 +2588,9 @@ export const swaggerDoc = {
               name: { $ref: '#/components/requestBodies/name' },
               CPForCNPJ: { $ref: '#/components/requestBodies/CPForCNPJ' },
               email: { $ref: '#/components/requestBodies/email' },
-              mobilePhone: { $ref: '#/components/requestBodies/mobilePhone' },
+              mobilePhone: {
+                $ref: '#/components/requestBodies/mobilePhone',
+              },
               fixedPhone: { $ref: '#/components/requestBodies/fixedPhone' },
               fileName: { $ref: '#/components/responses/fileName' },
               createdAt: { $ref: '#/components/responses/createdAt' },
@@ -1178,8 +2601,12 @@ export const swaggerDoc = {
             type: 'object',
             description: 'Alerts the user of unsaved or unsent data',
             properties: {
-              mobilePhone: { $ref: '#/components/responses/alertMobilePhone' },
-              fixedPhone: { $ref: '#/components/responses/alertFixedPhone' },
+              mobilePhone: {
+                $ref: '#/components/responses/alertMobilePhone',
+              },
+              fixedPhone: {
+                $ref: '#/components/responses/alertFixedPhone',
+              },
               file: { $ref: '#/components/responses/alertFile' },
             },
           },
@@ -1282,7 +2709,7 @@ export const swaggerDoc = {
         properties: {
           worker: { $ref: '#/components/responses/workerTrue' },
           name: { $ref: '#/components/requestBodies/name' },
-          CPForCNPJ: { $ref: '#/components/requestBodies/CPForCNPJ' },
+          CPF: { $ref: '#/components/requestBodies/CPF' },
           email: { $ref: '#/components/requestBodies/email' },
         },
       },
@@ -1291,8 +2718,227 @@ export const swaggerDoc = {
         properties: {
           worker: { $ref: '#/components/responses/workerFalse' },
           name: { $ref: '#/components/requestBodies/name' },
-          CPForCNPJ: { $ref: '#/components/requestBodies/CPForCNPJ' },
+          CPF: { $ref: '#/components/requestBodies/CPF' },
           email: { $ref: '#/components/requestBodies/email' },
+        },
+      },
+      accountRegister: {
+        type: 'object',
+        properties: {
+          balance: { $ref: '#/components/responses/balance' },
+          customer: { $ref: '#/components/responses/customer' },
+          createdAt: { $ref: '#/components/responses/createdAt' },
+          account: { $ref: '#/components/responses/account' },
+          customerName: { $ref: '#/components/responses/customerName' },
+        },
+      },
+      accountTransfer: {
+        type: 'object',
+        properties: {
+          sourceAccount: { $ref: '#/components/responses/sourceAccount' },
+          sourceCustomerName: {
+            $ref: '#/components/responses/sourceCustomerName',
+          },
+          destinyAccount: { $ref: '#/components/requestBodies/destinyAccount' },
+          destinyCustomerName: {
+            $ref: '#/components/responses/destinyCustomerName',
+          },
+          period: { $ref: '#/components/responses/period' },
+          createdAt: { $ref: '#/components/responses/createdAt' },
+          value: { $ref: '#/components/requestBodies/value' },
+          sourcePreviousBalance: {
+            $ref: '#/components/responses/sourcePreviousBalance',
+          },
+          sourceCurrentBalance: {
+            $ref: '#/components/responses/sourceCurrentBalance',
+          },
+        },
+      },
+      accountDebit: {
+        type: 'object',
+        properties: {
+          value: { $ref: '#/components/requestBodies/value' },
+          previousBalance: {
+            $ref: '#/components/responses/previousBalance',
+          },
+          currentBalance: {
+            $ref: '#/components/responses/debitCurrentBalance',
+          },
+          period: { $ref: '#/components/responses/period' },
+          createdAt: { $ref: '#/components/responses/createdAt' },
+          description: { $ref: '#/components/responses/debitDescription' },
+          indicator: { $ref: '#/components/responses/debitIndicator' },
+          account: { $ref: '#/components/responses/account' },
+          customerName: { $ref: '#/components/responses/customerName' },
+        },
+      },
+      accountCredit: {
+        type: 'object',
+        properties: {
+          value: { $ref: '#/components/requestBodies/value' },
+          previousBalance: {
+            $ref: '#/components/responses/previousBalance',
+          },
+          currentBalance: {
+            $ref: '#/components/responses/creditCurrentBalance',
+          },
+          period: { $ref: '#/components/responses/period' },
+          createdAt: { $ref: '#/components/responses/createdAt' },
+          description: { $ref: '#/components/responses/creditDescription' },
+          indicator: { $ref: '#/components/responses/creditIndicator' },
+          account: { $ref: '#/components/responses/account' },
+          customerName: { $ref: '#/components/responses/customerName' },
+        },
+      },
+      accountBalance: {
+        type: 'object',
+        properties: {
+          balance: { $ref: '#/components/responses/balance' },
+          customer: { $ref: '#/components/responses/customer' },
+          account: { $ref: '#/components/responses/account' },
+          customerName: { $ref: '#/components/responses/customerName' },
+        },
+      },
+      customerBalance: {
+        type: 'object',
+        properties: {
+          balance: { $ref: '#/components/responses/balance' },
+          account: { $ref: '#/components/responses/account' },
+          customerName: { $ref: '#/components/responses/customerName' },
+        },
+      },
+      accountDetails: {
+        type: 'array',
+        description: 'Returns the transactions of an account.',
+        items: { $ref: '#/components/responses/accountDebit' },
+      },
+      accountSummaryDaily: {
+        type: 'array',
+        description: 'Returns the daily summary of transactions in an account.',
+        items: {
+          type: 'object',
+          properties: {
+            totalTransactions: {
+              $ref: '#/components/responses/totalTransactions',
+            },
+            initialBalance: { $ref: '#/components/responses/initialBalance' },
+            totalDebits: { $ref: '#/components/responses/totalDebits' },
+            totalCredits: { $ref: '#/components/responses/totalCredits' },
+            finalBalance: { $ref: '#/components/responses/finalBalance' },
+            date: { $ref: '#/components/responses/date' },
+          },
+        },
+      },
+      accountSummaryMonthly: {
+        type: 'array',
+        description:
+          'Returns the monthly summary of transactions in an account.',
+        items: {
+          type: 'object',
+          properties: {
+            totalTransactions: {
+              $ref: '#/components/responses/totalTransactions',
+            },
+            initialBalance: { $ref: '#/components/responses/initialBalance' },
+            totalDebits: { $ref: '#/components/responses/totalDebits' },
+            totalCredits: { $ref: '#/components/responses/totalCredits' },
+            finalBalance: { $ref: '#/components/responses/finalBalance' },
+            period: { $ref: '#/components/responses/period' },
+          },
+        },
+      },
+      accountSummaryYearly: {
+        type: 'array',
+        description:
+          'Returns the yearly summary of transactions in an account.',
+        items: {
+          type: 'object',
+          properties: {
+            totalTransactions: {
+              $ref: '#/components/responses/totalTransactions',
+            },
+            initialBalance: { $ref: '#/components/responses/initialBalance' },
+            totalDebits: { $ref: '#/components/responses/totalDebits' },
+            totalCredits: { $ref: '#/components/responses/totalCredits' },
+            finalBalance: { $ref: '#/components/responses/finalBalance' },
+            year: { $ref: '#/components/responses/year' },
+          },
+        },
+      },
+      accountList: {
+        type: 'array',
+        description: 'Lists bank accounts and their balances.',
+        items: {
+          type: 'object',
+          properties: {
+            balance: { $ref: '#/components/responses/balance' },
+            account: { $ref: '#/components/responses/account' },
+          },
+        },
+      },
+      accountTotalBalance: {
+        type: 'array',
+        description: 'Returns the current balance available in bank accounts.',
+        items: {
+          type: 'object',
+          properties: {
+            totalAccounts: { $ref: '#/components/responses/totalAccounts' },
+            totalBalance: { $ref: '#/components/responses/totalBalance' },
+          },
+        },
+      },
+      accountTotalDaily: {
+        type: 'array',
+        description:
+          'Returns the daily total of bank transactions' +
+          'according to the parameters informed.',
+        items: {
+          type: 'object',
+          properties: {
+            totalTransactions: {
+              $ref: '#/components/responses/totalTransactions',
+            },
+            totalDebits: { $ref: '#/components/responses/totalDebits' },
+            totalCredits: { $ref: '#/components/responses/totalCredits' },
+            totalDifference: { $ref: '#/components/responses/totalDifference' },
+            date: { $ref: '#/components/responses/date' },
+          },
+        },
+      },
+      accountTotalMonthly: {
+        type: 'array',
+        description:
+          'Returns the monthly total of bank transactions' +
+          'according to the parameters informed.',
+        items: {
+          type: 'object',
+          properties: {
+            totalTransactions: {
+              $ref: '#/components/responses/totalTransactions',
+            },
+            totalDebits: { $ref: '#/components/responses/totalDebits' },
+            totalCredits: { $ref: '#/components/responses/totalCredits' },
+            totalDifference: { $ref: '#/components/responses/totalDifference' },
+            period: { $ref: '#/components/responses/period' },
+          },
+        },
+      },
+      accountTotalYearly: {
+        type: 'array',
+        description:
+          'Returns the annual total of bank transactions' +
+          'according to the parameters informed.',
+        items: {
+          type: 'object',
+          properties: {
+            totalTransactions: {
+              $ref: '#/components/responses/totalTransactions',
+            },
+            totalDebits: { $ref: '#/components/responses/totalDebits' },
+            totalCredits: { $ref: '#/components/responses/totalCredits' },
+            totalDifference: { $ref: '#/components/responses/totalDifference' },
+            year: { $ref: '#/components/responses/year' },
+          },
         },
       },
       //#endregion
@@ -1328,6 +2974,26 @@ export const swaggerDoc = {
             'but has been omitted.',
         },
       },
+      requiredCPF: {
+        value: {
+          error:
+            "The field 'CPF' is required in this request but has been omitted.",
+        },
+      },
+      requiredValue: {
+        value: {
+          error:
+            "The field 'value' is required in this request " +
+            'but has been omitted.',
+        },
+      },
+      requiredAccount: {
+        value: {
+          error:
+            "The field 'account' is required in this request " +
+            'but has been omitted.',
+        },
+      },
       invalidCPForCNPJ: {
         value: {
           error: "'123.456.789' is not a valid CPF or CNPJ.",
@@ -1346,6 +3012,71 @@ export const swaggerDoc = {
       invalidPDF: {
         value: {
           error: "The file 'example.doc' is not in PDF format.",
+        },
+      },
+      invalidTransaction: {
+        value: {
+          error:
+            "Transaction invalid. The available balance is '900' and " +
+            "it is not enough for the amount of this request, '1000'.",
+        },
+      },
+      invalidPeriod: {
+        value: {
+          error:
+            "The value '202009' in the 'period' field is invalid. " +
+            "Use the format 'yyyy-mm'.",
+        },
+      },
+      periodIsNaD: {
+        value: {
+          error:
+            "The 'period' field with value '2020-13' is not valid. " +
+            "Use the format 'yyyy-mm'.",
+        },
+      },
+      invalidYear: {
+        value: {
+          error:
+            "The value '202' in the 'period' field is invalid. " +
+            "Use the format 'yyyy'.",
+        },
+      },
+      yearIsNaD: {
+        value: {
+          error:
+            "The 'period' field with value '20-1' is not valid. " +
+            "Use the format 'yyyy'.",
+        },
+      },
+      valueIsNaN: {
+        value: {
+          error: "The value must be a number, but 'abc' is not.",
+        },
+      },
+      valueLessMinimum: {
+        value: {
+          error:
+            "The value must be equal or greater than '0.01', but '0' is not.",
+        },
+      },
+      accountIsNaN: {
+        value: {
+          error: "The account must be a number, but 'abcdefghi' is not.",
+        },
+      },
+      accountLessMinimum: {
+        value: {
+          error:
+            "The account must be equal or greater than '100000000', " +
+            "but '99999999' is not.",
+        },
+      },
+      accountGreaterMaximum: {
+        value: {
+          error:
+            "The account must be equal or less than '999999999', " +
+            "but '1000000000' is not.",
         },
       },
       //#endregion
@@ -1390,18 +3121,19 @@ export const swaggerDoc = {
       //#endregion
 
       //#region responses code 403
-      // customerAccessOnly: {
-      //   description: 'Forbidden',
-      //   content: {
-      //     'application/json': {
-      //       schema: { $ref: '#/components/responses/responseError' },
-      //       example: {
-      //         error:
-      //           'This content can only be accessed by employees of this bank.',
-      //       },
-      //     },
-      //   },
-      // },
+      customerAccessOnly: {
+        description: 'Forbidden',
+        content: {
+          'application/json': {
+            schema: { $ref: '#/components/responses/responseError' },
+            example: {
+              error:
+                'This content can only be accessed by customers of this bank. ' +
+                'Open your account.',
+            },
+          },
+        },
+      },
       userAccessOnly: {
         description: 'Forbidden',
         content: {
@@ -1438,6 +3170,138 @@ export const swaggerDoc = {
             schema: { $ref: '#/components/responses/responseError' },
             example: {
               error: "User with CPF '123.456.789-09' not found.",
+            },
+          },
+        },
+      },
+      accountNotFound: {
+        description: 'Not Found',
+        content: {
+          'application/json': {
+            schema: { $ref: '#/components/responses/responseError' },
+            example: {
+              error: "Account '100000001' not found.",
+            },
+          },
+        },
+      },
+      accountsNotFound: {
+        description: 'Not Found',
+        content: {
+          'application/json': {
+            schema: { $ref: '#/components/responses/responseError' },
+            example: {
+              error: 'Accounts not found.',
+            },
+          },
+        },
+      },
+      PFaccountsNotFound: {
+        value: {
+          error: 'Physical person accounts not found.',
+        },
+      },
+      PJaccountsNotFound: {
+        value: {
+          error: 'Legal person accounts not found.',
+        },
+      },
+      transactionsByAccountInMonthNotFound: {
+        description: 'Not Found',
+        content: {
+          'application/json': {
+            schema: { $ref: '#/components/responses/responseError' },
+            example: {
+              error:
+                "Transactions not found in the month '2020-09' and account '100000001'.",
+            },
+          },
+        },
+      },
+      transactionsByAccountInYearNotFound: {
+        description: 'Not Found',
+        content: {
+          'application/json': {
+            schema: { $ref: '#/components/responses/responseError' },
+            example: {
+              error:
+                "Transactions not found in the year '2020' and account '100000001'.",
+            },
+          },
+        },
+      },
+      accountTransactionsInMonthNotFound: {
+        description: 'Not Found',
+        content: {
+          'application/json': {
+            schema: { $ref: '#/components/responses/responseError' },
+            examples: {
+              accountNotFound: {
+                value: {
+                  error: "Account '100000001' not found.",
+                },
+              },
+              transactionsNotFound: {
+                value: {
+                  error:
+                    "Transactions not found in the month '2020-09' and account '100000001'.",
+                },
+              },
+            },
+          },
+        },
+      },
+      accountTransactionsInYearNotFound: {
+        description: 'Not Found',
+        content: {
+          'application/json': {
+            schema: { $ref: '#/components/responses/responseError' },
+            examples: {
+              accountNotFound: {
+                value: {
+                  error: "Account '100000001' not found.",
+                },
+              },
+              transactionsNotFound: {
+                value: {
+                  error:
+                    "Transactions not found in the year '2020' and account '100000001'.",
+                },
+              },
+            },
+          },
+        },
+      },
+      accountTotalInYearNotFound: {
+        description: 'Not Found',
+        content: {
+          'application/json': {
+            schema: { $ref: '#/components/responses/responseError' },
+            example: {
+              error:
+                "Transactions not found in the year '2020' and category 'all'.",
+            },
+          },
+        },
+      },
+      accountTotalInYearByCategoryNotFound: {
+        description: 'Not Found',
+        content: {
+          'application/json': {
+            schema: { $ref: '#/components/responses/responseError' },
+            examples: {
+              PFaccountTotalInYearNotFound: {
+                value: {
+                  error:
+                    "Transactions not found in the year '2020' and category 'PF'.",
+                },
+              },
+              PJaccountTotalInYearNotFound: {
+                value: {
+                  error:
+                    "Transactions not found in the year '2020' and category 'PJ'.",
+                },
+              },
             },
           },
         },
