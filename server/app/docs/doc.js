@@ -141,7 +141,7 @@ export const swaggerDoc = {
         },
       },
     },
-    '/auth/forgot_pass': {
+    '/auth/forgot_password': {
       post: {
         tags: ['auth'],
         summary: 'User forgot password',
@@ -200,7 +200,7 @@ export const swaggerDoc = {
         },
       },
     },
-    '/auth/reset_pass': {
+    '/auth/reset_password': {
       post: {
         tags: ['auth'],
         summary: 'User reset password',
