@@ -482,7 +482,7 @@ export const swaggerDoc = {
         security: [{ token: '' }],
       },
     },
-    '/user/setEmail': {
+    '/user/email': {
       patch: {
         tags: ['user'],
         summary: 'Authenticated user updates his email.',
@@ -531,7 +531,7 @@ export const swaggerDoc = {
         security: [{ token: '' }],
       },
     },
-    '/user/setMobile': {
+    '/user/mobile': {
       patch: {
         tags: ['user'],
         summary: 'Authenticated user updates his cell phone.',
@@ -586,7 +586,7 @@ export const swaggerDoc = {
         security: [{ token: '' }],
       },
     },
-    '/user/setLandline': {
+    '/user/landline': {
       patch: {
         tags: ['user'],
         summary: 'Authenticated user updates his landline.',
@@ -641,7 +641,7 @@ export const swaggerDoc = {
         security: [{ token: '' }],
       },
     },
-    '/user/setName': {
+    '/user/name': {
       patch: {
         tags: ['user'],
         summary: 'Authenticated non-customer user updates his name.',
@@ -690,7 +690,7 @@ export const swaggerDoc = {
         security: [{ token: '' }],
       },
     },
-    '/user/setFile': {
+    '/user/file': {
       patch: {
         tags: ['user'],
         summary: 'Authenticated non-customer user updates his own PDF file.',
@@ -741,7 +741,7 @@ export const swaggerDoc = {
         security: [{ token: '' }],
       },
     },
-    '/user/setWorker': {
+    '/user/worker': {
       patch: {
         tags: ['user'],
         summary: 'Worker grants worker access privileges to a user.',
@@ -787,7 +787,7 @@ export const swaggerDoc = {
         security: [{ token: '' }],
       },
     },
-    '/user/setWorker/revoke': {
+    '/user/worker/revoke': {
       patch: {
         tags: ['user'],
         summary: 'Worker revokes worker access privileges to a user.',
