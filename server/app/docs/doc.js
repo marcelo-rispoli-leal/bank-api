@@ -196,7 +196,7 @@ export const swaggerDoc = {
             },
           },
           404: { $ref: '#/components/responses/userNotFound' },
-          500: { $ref: '#/components/responses/unexpectednalError' },
+          500: { $ref: '#/components/responses/unexpectedError' },
         },
       },
     },
