@@ -2199,6 +2199,13 @@ export const swaggerDoc = {
           fixedPhone: { $ref: '#/components/requestBodies/fixedPhone' },
         },
       },
+      userSetName: {
+        type: 'object',
+        required: ['name'],
+        properties: {
+          name: { $ref: '#/components/requestBodies/name' },
+        },
+      },
       userSetFile: {
         type: 'object',
         required: ['file'],
