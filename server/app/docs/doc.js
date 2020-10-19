@@ -2,7 +2,7 @@ export const swaggerDoc = {
   openapi: '3.0.1',
   info: {
     title: 'BAAS - Bank As A Service',
-    description: 'This is a sample and fictitious Bank API.',
+    description: 'This is a fictional sample of a banking API.',
     contact: {
       email: 'marcelorispoli@gmail.com',
     },
